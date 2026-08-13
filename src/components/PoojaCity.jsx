@@ -76,6 +76,20 @@ function PlotGrid() {
   );
 }
 
+function LogoMark({ size = 34 }) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 64 64" aria-hidden="true">
+      <rect x="1" y="1" width="62" height="62" rx="6" fill="#16262A" stroke="#C79A3D" strokeWidth="1.2" />
+      <g transform="translate(32,33) rotate(45)">
+        <rect x="-16" y="-16" width="32" height="32" fill="none" stroke="#C79A3D" strokeWidth="1.6" />
+        <rect x="-16" y="-16" width="16" height="16" fill="#B0552F" />
+        <line x1="-16" y1="0" x2="16" y2="0" stroke="#C79A3D" strokeWidth="1.1" />
+        <line x1="0" y1="-16" x2="0" y2="16" stroke="#C79A3D" strokeWidth="1.1" />
+      </g>
+    </svg>
+  );
+}
+
 function Stat({ value, label }) {
   return (
     <div className="stat reveal">
@@ -85,22 +99,37 @@ function Stat({ value, label }) {
   );
 }
 
-function DocCard({ tag, title, desc, meta, href }) {
+function DocCard({ tag, title, desc, meta, href, preview, verified = true }) {
   return (
-    <a className="doc-card reveal" href={href} download>
-      <div className="doc-card-top">
-        <div className="doc-tag">{tag}</div>
-        <span className="doc-icon" aria-hidden="true">
-          <svg viewBox="0 0 24 24" width="16" height="16" fill="none">
-            <path d="M12 3v12m0 0l-4.5-4.5M12 15l4.5-4.5M4 19h16" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" />
-          </svg>
-        </span>
+    <a className="doc-card reveal" href={href} target="_blank" rel="noreferrer">
+      <div className="doc-preview">
+        <iframe
+          className="doc-pdf-preview"
+          src={`${href}#page=1&view=FitH`}
+          title={`${title} PDF preview`}
+        />
+        {verified && <div className="verified-badge">✓ Verified</div>}
       </div>
-      <h3>{title}</h3>
-      <p>{desc}</p>
-      <div className="doc-meta">
-        <span>{meta}</span>
-        <span className="doc-cta">Download PDF →</span>
+
+      <div className="doc-content">
+        <div className="doc-card-top">
+          <div className="doc-tag">{tag}</div>
+          <span className="doc-icon" aria-hidden="true">
+            <svg viewBox="0 0 24 24" width="16" height="16" fill="none">
+              <path d="M12 3v12m0 0l-4.5-4.5M12 15l4.5-4.5M4 19h16"
+                stroke="currentColor" strokeWidth="1.6"
+                strokeLinecap="round" strokeLinejoin="round" />
+            </svg>
+          </span>
+        </div>
+
+        <h3>{title}</h3>
+        <p>{desc}</p>
+
+        <div className="doc-meta">
+          <span>{meta}</span>
+          <span className="doc-cta">View PDF →</span>
+        </div>
       </div>
     </a>
   );
@@ -145,10 +174,10 @@ export default function PoojaCity() {
         @import url('https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,300;9..144,500;9..144,600;9..144,700&family=Space+Grotesk:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap');
 
         .pc-root {
-          --ink:#16262A; --ink2:#1E3A3F; --terracotta:#B0552F; --gold:#C79A3D;
-          --parchment:#F1EAD9; --sage:#7C9885; --line:#D9CFB8; --text:#221D17;
+          --ink:#29483D; --ink2:#365B4E; --terracotta:#C8754C; --gold:#B28A3A;
+          --parchment:#FBF8F1; --sage:#7F9B8A; --line:#E8E0D2; --text:#2C302B;
           font-family:'Space Grotesk', sans-serif;
-          background:var(--parchment);
+          background:#FBF9F4;
           color:var(--text);
           width:100%;
           overflow-x:hidden;
@@ -192,6 +221,7 @@ export default function PoojaCity() {
           padding:12px 0; border-bottom:1px solid rgba(241,234,217,0.12); width:100%;
         }
         .mobile-menu-rera { margin-top:24px; color:var(--gold); font-size:0.8rem; letter-spacing:0.04em; }
+        .mobile-menu-mark { margin-bottom:24px; }
 
         @media (max-width:760px){
           .nav-links{ display:none; }
@@ -205,9 +235,11 @@ export default function PoojaCity() {
           display:flex; flex-direction:column; justify-content:center;
           padding:120px 6vw 80px; overflow:hidden;
           background-image:
-            linear-gradient(180deg, rgba(22,38,42,0.35), rgba(22,38,42,0.92)),
-            repeating-linear-gradient(0deg, rgba(199,154,61,0.05) 0 1px, transparent 1px 64px),
-            repeating-linear-gradient(90deg, rgba(199,154,61,0.05) 0 1px, transparent 1px 64px);
+            linear-gradient(180deg, rgba(22,38,42,0.55), rgba(22,38,42,0.94)),
+            url('/images/pooja-city-hero-background.svg');
+          background-size: cover, cover;
+          background-position: center, center;
+          background-repeat: no-repeat, no-repeat;
         }
         .hero-inner { position:relative; z-index:2; max-width:760px; }
         .eyebrow {
@@ -310,7 +342,12 @@ export default function PoojaCity() {
         .approval-card .ac-foot { margin-top:24px; padding-top:18px; border-top:1px solid var(--line); font-family:'IBM Plex Mono',monospace; font-size:0.72rem; color:#6b6153; display:flex; justify-content:space-between; flex-wrap:wrap; gap:8px; }
 
         /* ---------- promoters ---------- */
-        .promoter-block { background:var(--ink2); }
+        .promoter-block {
+          background:var(--ink2);
+          background-image:url('/images/pooja-city-bg-pattern.svg');
+          background-size:400px 400px;
+          background-repeat:repeat;
+        }
         .promoter-block .kicker { color:var(--gold); }
         .promoter-block h2.h-title, .promoter-block .lead-text { color:var(--parchment); }
         .promoter-block .lead-text { color:rgba(241,234,217,0.68); }
@@ -324,39 +361,245 @@ export default function PoojaCity() {
         .promoter-card dt { font-family:'IBM Plex Mono',monospace; font-size:0.68rem; letter-spacing:0.1em; text-transform:uppercase; color:rgba(241,234,217,0.45); margin-bottom:4px; }
         .promoter-card dd { margin:0; color:rgba(241,234,217,0.85); font-size:0.92rem; line-height:1.5; }
 
-        /* ---------- documents ---------- */
-        .doc-grid { display:grid; grid-template-columns:repeat(3,1fr); gap:24px; margin-top:48px; }
-        @media (max-width:900px){ .doc-grid{ grid-template-columns:1fr; } }
+
+        /* ---------- light document cards ---------- */
+        .documents-block {
+          background:linear-gradient(180deg,#fffdf9 0%,#f7f3ea 100%);
+        }
+
+        .doc-grid {
+          display:grid;
+          grid-template-columns:repeat(3,1fr);
+          gap:26px;
+          margin-top:48px;
+        }
+
         .doc-card {
-          display:block; border:1px solid var(--line); background:#fff; padding:30px;
-          text-decoration:none; color:inherit; cursor:pointer;
-          transition:border-color .2s, transform .2s, box-shadow .2s;
+          display:block;
+          overflow:hidden;
+          border:1px solid #e5dccd;
+          border-radius:18px;
+          background:#fff;
+          text-decoration:none;
+          color:inherit;
+          cursor:pointer;
+          box-shadow:0 10px 30px rgba(49,61,52,0.07);
+          transition:transform .25s ease, box-shadow .25s ease, border-color .25s ease;
         }
-        .doc-card, .doc-card:visited, .doc-card:active { color:inherit; text-decoration:none; }
-        .doc-card:hover { border-color:var(--terracotta); transform:translateY(-4px); box-shadow:0 14px 30px rgba(22,38,42,0.1); }
-        .doc-card-top { display:flex; align-items:center; justify-content:space-between; margin-bottom:16px; }
-        .doc-icon {
-          width:30px; height:30px; border:1px solid var(--line); border-radius:50%;
-          display:flex; align-items:center; justify-content:center; color:var(--terracotta);
-          transition:background .2s, color .2s, border-color .2s;
-        }
-        .doc-card:hover .doc-icon { background:var(--terracotta); color:#fff; border-color:var(--terracotta); }
-        .doc-tag { font-family:'IBM Plex Mono',monospace; font-size:0.68rem; letter-spacing:0.1em; text-transform:uppercase; color:var(--terracotta); border:1px solid var(--terracotta); display:inline-block; padding:4px 10px; margin:0; }
-        .doc-card h3 { font-family:'Fraunces',serif; font-size:1.2rem; margin:0 0 10px; color:var(--text); text-decoration:none; }
-        .doc-card p { font-size:0.9rem; color:#584e40; line-height:1.55; margin:0 0 16px; text-decoration:none; }
-        .doc-meta {
-          font-family:'IBM Plex Mono',monospace; font-size:0.72rem; color:var(--sage);
-          border-top:1px solid var(--line); padding-top:14px;
-          display:flex; align-items:center; justify-content:space-between; gap:10px; flex-wrap:wrap;
+
+        .doc-card, .doc-card:visited, .doc-card:active {
+          color:inherit;
           text-decoration:none;
         }
-        .doc-cta { color:var(--terracotta); font-weight:500; white-space:nowrap; }
+
+        .doc-card:hover {
+          border-color:#c9b994;
+          transform:translateY(-5px);
+          box-shadow:0 18px 42px rgba(49,61,52,0.12);
+        }
+
+        .doc-preview {
+          height:300px;
+          background:#f0ede6;
+          border-bottom:1px solid #e5dccd;
+          position:relative;
+          overflow:hidden;
+          display:flex;
+          align-items:center;
+          justify-content:center;
+          padding:14px;
+        }
+
+        .doc-preview img {
+          width:100%;
+          height:100%;
+          object-fit:contain;
+          display:block;
+          border-radius:7px;
+          box-shadow:0 5px 18px rgba(31,45,38,0.12);
+          background:#fff;
+        }
+
+        .doc-pdf-preview {
+          width:100%;
+          height:100%;
+          min-height:100%;
+          border:0;
+          border-radius:7px;
+          display:block;
+          background:#fff;
+          box-shadow:0 5px 18px rgba(31,45,38,0.12);
+          pointer-events:none;
+        }
+
+        .verified-badge {
+          position:absolute;
+          top:14px;
+          right:14px;
+          background:#3E6B4E;
+          color:#fff;
+          padding:8px 13px;
+          border-radius:999px;
+          font-size:.72rem;
+          font-weight:700;
+          letter-spacing:.02em;
+          box-shadow:0 5px 14px rgba(38,66,48,.18);
+        }
+
+        .doc-content {
+          padding:24px 26px 25px;
+        }
+
+        .doc-card-top {
+          display:flex;
+          align-items:center;
+          justify-content:space-between;
+          margin-bottom:14px;
+        }
+
+        .doc-icon {
+          width:32px;
+          height:32px;
+          border:1px solid #ded5c6;
+          border-radius:50%;
+          display:flex;
+          align-items:center;
+          justify-content:center;
+          color:var(--terracotta);
+          background:#fffaf2;
+          transition:background .2s, color .2s, border-color .2s;
+        }
+
+        .doc-card:hover .doc-icon {
+          background:var(--terracotta);
+          color:#fff;
+          border-color:var(--terracotta);
+        }
+
+        .doc-tag {
+          font-family:'IBM Plex Mono',monospace;
+          font-size:.67rem;
+          letter-spacing:.1em;
+          text-transform:uppercase;
+          color:#9B673E;
+          background:#fbf2e7;
+          border:1px solid #ead8c4;
+          border-radius:6px;
+          display:inline-block;
+          padding:5px 10px;
+        }
+
+        .doc-card h3 {
+          font-family:'Fraunces',serif;
+          font-size:1.35rem;
+          line-height:1.2;
+          margin:0 0 9px;
+          color:#27372F;
+        }
+
+        .doc-card p {
+          font-size:.9rem;
+          color:#665f54;
+          line-height:1.6;
+          margin:0 0 18px;
+        }
+
+        .doc-meta {
+          font-family:'IBM Plex Mono',monospace;
+          font-size:.69rem;
+          color:#718675;
+          border-top:1px solid #eee6d9;
+          padding-top:14px;
+          display:flex;
+          align-items:center;
+          justify-content:space-between;
+          gap:10px;
+          flex-wrap:wrap;
+        }
+
+        .doc-cta {
+          color:#A85F3D;
+          font-weight:600;
+          white-space:nowrap;
+        }
+
+        /* ---------- RERA preview below hero ---------- */
+        .rera-preview-section {
+          background:#F5F1E8;
+          border-top:1px solid #E6DDCF;
+          border-bottom:1px solid #E6DDCF;
+          padding:76px 6vw;
+        }
+
+        .rera-preview-wrap {
+          max-width:1180px;
+          margin:0 auto;
+        }
+
+        .rera-preview-head {
+          display:flex;
+          align-items:flex-end;
+          justify-content:space-between;
+          gap:30px;
+          margin-bottom:28px;
+        }
+
+        .rera-preview-head h2 {
+          margin:0 0 8px;
+          font-family:'Fraunces',serif;
+          font-size:clamp(2rem,4vw,3rem);
+          color:#29483D;
+        }
+
+        .rera-preview-head p {
+          margin:0;
+          color:#6c665d;
+          max-width:650px;
+          line-height:1.65;
+        }
+
+        .rera-pdf-frame {
+          background:#fff;
+          border:1px solid #e1d8ca;
+          border-radius:18px;
+          padding:12px;
+          box-shadow:0 14px 38px rgba(47,57,49,.08);
+        }
+
+        .rera-pdf-frame iframe {
+          width:100%;
+          height:650px;
+          border:0;
+          border-radius:10px;
+          background:#f8f5ee;
+        }
+
+        .rera-pdf-note {
+          display:flex;
+          justify-content:space-between;
+          align-items:center;
+          gap:16px;
+          margin-top:14px;
+          padding:0 5px;
+          color:#756d61;
+          font-family:'IBM Plex Mono',monospace;
+          font-size:.7rem;
+        }
+
+        .rera-pdf-link {
+          color:#9B5D3F;
+          text-decoration:none;
+          font-weight:600;
+        }
+
+        .rera-pdf-link:hover { text-decoration:underline; }
 
         /* ---------- footer ---------- */
         footer.pc-footer { background:var(--ink); color:rgba(241,234,217,0.6); padding:70px 6vw 34px; }
         .footer-top { display:grid; grid-template-columns:1.3fr 1fr 1fr; gap:40px; padding-bottom:44px; border-bottom:1px solid rgba(241,234,217,0.14); }
         @media (max-width:760px){ .footer-top{ grid-template-columns:1fr; } }
-        .footer-top h4 { font-family:'Fraunces',serif; color:var(--parchment); font-size:1.5rem; margin:0 0 14px; }
+        .footer-top h4 { font-family:'Fraunces',serif; color:var(--parchment); font-size:1.5rem; margin:0; }
+        .footer-mark { display:flex; align-items:center; gap:12px; margin-bottom:14px; }
         .footer-top p { font-size:0.9rem; line-height:1.6; max-width:340px; }
         .footer-col-title { font-family:'IBM Plex Mono',monospace; font-size:0.7rem; letter-spacing:0.1em; text-transform:uppercase; color:var(--gold); margin-bottom:16px; }
         .footer-col p, .footer-col a { font-size:0.9rem; line-height:1.7; color:rgba(241,234,217,0.65); text-decoration:none; display:block; }
@@ -366,6 +609,13 @@ export default function PoojaCity() {
 
         /* ---------- mobile: sections, stats, cards ---------- */
         @media (max-width:640px){
+          .rera-preview-section{ padding:58px 6vw; }
+          .rera-preview-head{ align-items:flex-start; }
+          .rera-pdf-frame{ padding:8px; }
+          .rera-pdf-frame iframe{ height:520px; }
+          .rera-pdf-note{ flex-direction:column; align-items:flex-start; gap:8px; }
+          .doc-preview{ height:260px; }
+          .doc-content{ padding:22px; }
           section.block{ padding:64px 6vw; }
           h2.h-title{ font-size:2rem; margin-bottom:16px; }
           .lead-text{ font-size:0.95rem; }
@@ -401,7 +651,7 @@ export default function PoojaCity() {
 
       {/* NAV */}
       <nav className={`nav ${navSolid ? "solid" : ""}`}>
-        <div className="nav-mark"><span className="dot" /> POOJA CITY</div>
+        <div className="nav-mark"><LogoMark size={30} /> POOJA CITY</div>
         <div className="nav-links">
           <a href="#about">Overview</a>
           <a href="#location">Location</a>
@@ -422,6 +672,7 @@ export default function PoojaCity() {
       </nav>
 
       <div className={`mobile-menu ${menuOpen ? "is-open" : ""}`}>
+        <div className="mobile-menu-mark"><LogoMark size={40} /></div>
         <a href="#about" onClick={closeMenu}>Overview</a>
         <a href="#location" onClick={closeMenu}>Location</a>
         <a href="#approvals" onClick={closeMenu}>Approvals</a>
@@ -451,6 +702,40 @@ export default function PoojaCity() {
           </div>
         </div>
       </header>
+
+      {/* RERA PDF — immediately below hero */}
+      <section className="rera-preview-section" id="rera-document">
+        <div className="rera-preview-wrap">
+          <div className="rera-preview-head reveal">
+            <div>
+              <span className="kicker">RERA Certificate</span>
+              <h2>Official RERA registration document.</h2>
+              <p>
+                View the official CG-RERA registration certificate directly below the hero.
+                The same PDF is also available in the Documents section.
+              </p>
+            </div>
+          </div>
+
+          <div className="rera-pdf-frame reveal">
+            <iframe
+              src="/documents/rera-registration-certificate.pdf"
+              title="Pooja City CG-RERA Registration Certificate"
+            />
+            <div className="rera-pdf-note">
+              <span>PCGRERA090226002040 · Issued 09 Feb 2026</span>
+              <a
+                className="rera-pdf-link"
+                href="/documents/rera-registration-certificate.pdf"
+                target="_blank"
+                rel="noreferrer"
+              >
+                Open / Download PDF →
+              </a>
+            </div>
+          </div>
+        </div>
+      </section>
 
       {/* STATS */}
       <div className="stats-strip">
@@ -562,7 +847,7 @@ export default function PoojaCity() {
       </section>
 
       {/* PROMOTERS */}
-      <section className="block promoter-block" id="promoters">
+      {/* <section className="block promoter-block" id="promoters">
         <span className="kicker">04 — Promoters</span>
         <h2 className="h-title">The developers on record.</h2>
         <p className="lead-text">As named in the RERA registration certificate and Annexure-13 of the project filing.</p>
@@ -583,10 +868,10 @@ export default function PoojaCity() {
           />
         </div>
         <p className="fade-note">PAN and Aadhaar details are filed with CG-RERA (Annexure-13) and withheld here for the promoters' privacy.</p>
-      </section>
+      </section> */}
 
       {/* DOCUMENTS */}
-      <section className="block" id="documents">
+      <section className="block documents-block" id="documents">
         <span className="kicker">05 — Documents</span>
         <h2 className="h-title">Official record, unredacted.</h2>
         <p className="lead-text">The three filings this page is built from — issued by CG-RERA and the Directorate of Town &amp; Country Planning.</p>
@@ -597,6 +882,7 @@ export default function PoojaCity() {
             desc="Chhattisgarh RERA's Form-C certificate registering Pooja City under the RERA Act, 2016, with validity and promoter conditions."
             meta="Reg. No. PCGRERA090226002040 · Raipur"
             href="/documents/rera-registration-certificate.pdf"
+            preview="/documents/rera-registration-certificate-preview.jpg"
           />
           <DocCard
             tag="TNCP Approval"
@@ -604,6 +890,7 @@ export default function PoojaCity() {
             desc="Development permission for commercial plotting, with the full 33-point condition schedule from the Bilaspur Regional TNCP office."
             meta="Letter No. CG/BSP/TNCP/PLC/2025/0024"
             href="/documents/tncp-development-permission.pdf"
+            preview="/documents/tncp-development-permission-preview.jpg"
           />
           <DocCard
             tag="Annexure-13"
@@ -611,6 +898,7 @@ export default function PoojaCity() {
             desc="Statutory promoter-details annexure naming Manoj Kumar Sidara and Prithvi Raj Sidara as the project's promoters."
             meta="Annexure-13 · Photograph identification"
             href="/documents/promoter-details-annexure-13.pdf"
+            preview="/documents/promoter-details-annexure-13-preview.jpg"
           />
         </div>
       </section>
@@ -619,7 +907,7 @@ export default function PoojaCity() {
       <footer className="pc-footer">
         <div className="footer-top">
           <div>
-            <h4>Pooja City</h4>
+            <div className="footer-mark"><LogoMark size={38} /><h4>Pooja City</h4></div>
             <p>Commercial plotted development at Lal Khadan, Torwa, District Bilaspur, Chhattisgarh — registered with CG-RERA under Reg. No. PCGRERA090226002040.</p>
           </div>
           <div className="footer-col">
