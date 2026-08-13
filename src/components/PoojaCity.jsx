@@ -2,6 +2,16 @@ import React, { useEffect, useState } from "react";
 
 /* ---------------------------------------------------------------
    POOJA CITY — Commercial Plotted Development, Torwa, Bilaspur
+   Design tokens (light theme)
+   Page       #F7F3E8   parchment page background
+   Surface    #FFFFFF   card / panel white
+   Surface-2  #EFE6D2   warm cream secondary panel
+   Terracotta #B0552F   Chhattisgarh soil / brick — primary accent
+   Gold       #C79A3D   seal / certificate accent — secondary
+   Sage       #7C9885   land / plantation
+   Line       #E3DAC4   hairline
+   Text-dark  #221D17   primary text
+   Ink        #16262A   reserved for the logo mark only
 ---------------------------------------------------------------- */
 
 const KHASRAS = ["1368/1", "1368/3", "1369/1", "1369/3", "1371/2"];
@@ -9,1203 +19,719 @@ const KHASRAS = ["1368/1", "1368/3", "1369/1", "1369/3", "1371/2"];
 function useReveal() {
   useEffect(() => {
     const els = document.querySelectorAll(".reveal");
-
     const io = new IntersectionObserver(
       (entries) => {
         entries.forEach((e) => {
-          if (e.isIntersecting) {
-            e.target.classList.add("is-in");
-          }
+          if (e.isIntersecting) e.target.classList.add("is-in");
         });
       },
-      { threshold: 0.12 }
+      { threshold: 0.16 }
     );
-
     els.forEach((el) => io.observe(el));
-
     return () => io.disconnect();
   }, []);
 }
 
-/* ---------------------------------------------------------------
-   PLOT GRID
----------------------------------------------------------------- */
-
 function PlotGrid() {
+  // Signature element: a stylised cadastral plan of the five khasra
+  // parcels that make up the project, with the 30m road-setback line
+  // called out — literally "plotted development".
   return (
-    <svg
-      viewBox="0 0 640 460"
-      className="plot-grid"
-      aria-hidden="true"
-    >
+    <svg viewBox="0 0 640 460" className="plot-grid" aria-hidden="true">
       <defs>
-        <pattern
-          id="hatch"
-          width="7"
-          height="7"
-          patternTransform="rotate(45)"
-          patternUnits="userSpaceOnUse"
-        >
-          <line
-            x1="0"
-            y1="0"
-            x2="0"
-            y2="7"
-            stroke="rgba(199,154,61,0.35)"
-            strokeWidth="1"
-          />
+        <pattern id="hatch" width="7" height="7" patternTransform="rotate(45)" patternUnits="userSpaceOnUse">
+          <line x1="0" y1="0" x2="0" y2="7" stroke="rgba(199,154,61,0.35)" strokeWidth="1" />
         </pattern>
       </defs>
 
-      {/* ROAD */}
-      <rect
-        x="0"
-        y="0"
-        width="640"
-        height="70"
-        fill="rgba(241,234,217,0.06)"
-      />
+      {/* road */}
+      <rect x="0" y="0" width="640" height="70" fill="rgba(34,29,23,0.06)" />
+      <line x1="0" y1="35" x2="640" y2="35" stroke="#C79A3D" strokeWidth="1.4" strokeDasharray="10 8" />
+      <text x="16" y="22" className="svg-label">NEHRU CHOWK — DARDIGHAT MARG · 60.00 M ROW</text>
 
-      <line
-        x1="0"
-        y1="35"
-        x2="640"
-        y2="35"
-        stroke="#C79A3D"
-        strokeWidth="1.4"
-        strokeDasharray="10 8"
-      />
+      {/* setback line */}
+      <line x1="0" y1="105" x2="640" y2="105" stroke="#7C9885" strokeWidth="1.2" strokeDasharray="3 5" />
+      <text x="16" y="98" className="svg-label svg-label--sage">30.00 M SETBACK FROM ROAD MID-LINE</text>
 
-      <text
-        x="16"
-        y="22"
-        className="svg-label"
-      >
-        NEHRU CHOWK — DARDIGHAT MARG · 60.00 M ROW
-      </text>
-
-      {/* SETBACK */}
-
-      <line
-        x1="0"
-        y1="105"
-        x2="640"
-        y2="105"
-        stroke="#7C9885"
-        strokeWidth="1.2"
-        strokeDasharray="3 5"
-      />
-
-      <text
-        x="16"
-        y="98"
-        className="svg-label svg-label--sage"
-      >
-        30.00 M SETBACK FROM ROAD MID-LINE
-      </text>
-
-      {/* PARCELS */}
-
+      {/* five parcels */}
       {[
-        {
-          x: 30,
-          y: 130,
-          w: 220,
-          h: 140,
-          id: "1368/1",
-        },
-        {
-          x: 270,
-          y: 130,
-          w: 150,
-          h: 140,
-          id: "1368/3",
-        },
-        {
-          x: 440,
-          y: 130,
-          w: 170,
-          h: 90,
-          id: "1369/1",
-        },
-        {
-          x: 30,
-          y: 290,
-          w: 260,
-          h: 130,
-          id: "1369/3",
-        },
-        {
-          x: 310,
-          y: 250,
-          w: 300,
-          h: 170,
-          id: "1371/2",
-        },
+        { x: 30, y: 130, w: 220, h: 140, id: "1368/1" },
+        { x: 270, y: 130, w: 150, h: 140, id: "1368/3" },
+        { x: 440, y: 130, w: 170, h: 90, id: "1369/1" },
+        { x: 30, y: 290, w: 260, h: 130, id: "1369/3" },
+        { x: 310, y: 250, w: 300, h: 170, id: "1371/2" },
       ].map((p, i) => (
-        <g
-          key={p.id}
-          className="parcel"
-          style={{
-            animationDelay: `${i * 120}ms`,
-          }}
-        >
-          <rect
-            x={p.x}
-            y={p.y}
-            width={p.w}
-            height={p.h}
-            fill="url(#hatch)"
-            stroke="#C79A3D"
-            strokeWidth="1.2"
-          />
-
-          <text
-            x={p.x + p.w / 2}
-            y={p.y + p.h / 2 - 4}
-            textAnchor="middle"
-            className="svg-parcel-id"
-          >
+        <g key={p.id} className="parcel" style={{ animationDelay: `${i * 120}ms` }}>
+          <rect x={p.x} y={p.y} width={p.w} height={p.h} fill="url(#hatch)" stroke="#C79A3D" strokeWidth="1.2" />
+          <text x={p.x + p.w / 2} y={p.y + p.h / 2 - 4} textAnchor="middle" className="svg-parcel-id">
             KH. {p.id}
           </text>
-
-          <text
-            x={p.x + p.w / 2}
-            y={p.y + p.h / 2 + 14}
-            textAnchor="middle"
-            className="svg-parcel-sub"
-          >
+          <text x={p.x + p.w / 2} y={p.y + p.h / 2 + 14} textAnchor="middle" className="svg-parcel-sub">
             VILLAGE TORVA
           </text>
         </g>
       ))}
 
-      <text
-        x="16"
-        y="446"
-        className="svg-label"
-      >
-        TOTAL AREA 0.4930 HA · COMMERCIAL PLOTTING 0.324989 HA
-      </text>
+      <text x="16" y="446" className="svg-label">TOTAL AREA 0.4930 HA · COMMERCIAL PLOTTING 0.324989 HA</text>
     </svg>
   );
 }
 
-/* ---------------------------------------------------------------
-   LOGO
----------------------------------------------------------------- */
-
 function LogoMark({ size = 34 }) {
   return (
-    <svg
-      width={size}
-      height={size}
-      viewBox="0 0 64 64"
-      aria-hidden="true"
-    >
-      <rect
-        x="1"
-        y="1"
-        width="62"
-        height="62"
-        rx="6"
-        fill="#29483D"
-        stroke="#C7A45A"
-        strokeWidth="1.2"
-      />
-
+    <svg width={size} height={size} viewBox="0 0 64 64" aria-hidden="true">
+      <rect x="1" y="1" width="62" height="62" rx="6" fill="#16262A" stroke="#C79A3D" strokeWidth="1.2" />
       <g transform="translate(32,33) rotate(45)">
-        <rect
-          x="-16"
-          y="-16"
-          width="32"
-          height="32"
-          fill="none"
-          stroke="#C7A45A"
-          strokeWidth="1.6"
-        />
-
-        <rect
-          x="-16"
-          y="-16"
-          width="16"
-          height="16"
-          fill="#C8754C"
-        />
-
-        <line
-          x1="-16"
-          y1="0"
-          x2="16"
-          y2="0"
-          stroke="#C7A45A"
-          strokeWidth="1.1"
-        />
-
-        <line
-          x1="0"
-          y1="-16"
-          x2="0"
-          y2="16"
-          stroke="#C7A45A"
-          strokeWidth="1.1"
-        />
+        <rect x="-16" y="-16" width="32" height="32" fill="none" stroke="#C79A3D" strokeWidth="1.6" />
+        <rect x="-16" y="-16" width="16" height="16" fill="#B0552F" />
+        <line x1="-16" y1="0" x2="16" y2="0" stroke="#C79A3D" strokeWidth="1.1" />
+        <line x1="0" y1="-16" x2="0" y2="16" stroke="#C79A3D" strokeWidth="1.1" />
       </g>
     </svg>
   );
 }
 
-/* ---------------------------------------------------------------
-   STAT
----------------------------------------------------------------- */
+function PdfViewer({ src }) {
+  const viewerSrc = `${src}#view=FitH&toolbar=1`;
+  return (
+    <div className="pdf-viewer">
+      <iframe src={viewerSrc} title={src} loading="lazy" />
+      <div className="pdf-viewer-fallback mono">
+        Document not loading? <a href={src} target="_blank" rel="noreferrer">Open in a new tab</a> or <a href={src} download>download it</a>.
+      </div>
+    </div>
+  );
+}
 
 function Stat({ value, label }) {
   return (
     <div className="stat reveal">
-      <div className="stat-value">
-        {value}
-      </div>
+      <div className="stat-value">{value}</div>
+      <div className="stat-label">{label}</div>
+    </div>
+  );
+}
 
-      <div className="stat-label">
-        {label}
+function DocCard({ tag, title, desc, meta, href }) {
+  return (
+    <div className="doc-card reveal">
+      <div className="doc-card-top">
+        <div className="doc-tag">{tag}</div>
+        <span className="doc-icon" aria-hidden="true">
+          <svg viewBox="0 0 24 24" width="16" height="16" fill="none">
+            <path d="M12 3v12m0 0l-4.5-4.5M12 15l4.5-4.5M4 19h16" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" />
+          </svg>
+        </span>
+      </div>
+      <h3>{title}</h3>
+      <p>{desc}</p>
+      <div className="doc-meta">
+        <span>{meta}</span>
+      </div>
+      <div className="doc-card-embed">
+        <PdfViewer src={href} />
+        <div className="pdf-actions pdf-actions-card">
+          <a className="btn btn-primary btn-small" href={href} target="_blank" rel="noreferrer">Open full document</a>
+          <a className="btn btn-ghost btn-small" href={href} download>Download PDF</a>
+        </div>
       </div>
     </div>
   );
 }
 
-/* ---------------------------------------------------------------
-   PDF PREVIEW
-
-   Google viewer is used because many mobile browsers do not
-   render PDFs correctly inside a normal iframe and instead show
-   an "Open" button.
----------------------------------------------------------------- */
-
-function PdfPreview({ href, title }) {
-  const [viewerUrl, setViewerUrl] = useState("");
-
-  useEffect(() => {
-    if (typeof window !== "undefined") {
-      const fullUrl =
-        window.location.origin + href;
-
-      const googleViewer =
-        `https://docs.google.com/gview?embedded=1&url=${encodeURIComponent(
-          fullUrl
-        )}`;
-
-      setViewerUrl(googleViewer);
-    }
-  }, [href]);
-
-  return (
-    <div className="pdf-preview">
-      {viewerUrl ? (
-        <iframe
-          src={viewerUrl}
-          title={`${title} PDF preview`}
-          className="pdf-preview-frame"
-          loading="lazy"
-        />
-      ) : (
-        <div className="pdf-loading">
-          Loading PDF...
-        </div>
-      )}
-
-      <div className="pdf-overlay" />
-    </div>
-  );
-}
-
-/* ---------------------------------------------------------------
-   DOCUMENT CARD
----------------------------------------------------------------- */
-
-function DocCard({
-  tag,
-  title,
-  desc,
-  meta,
-  href,
-}) {
-  return (
-    <article className="doc-card reveal">
-
-      {/* PDF PREVIEW */}
-
-      <div className="doc-preview">
-
-        <PdfPreview
-          href={href}
-          title={title}
-        />
-
-        <div className="verified-badge">
-          ✓ Verified
-        </div>
-
-      </div>
-
-      {/* CONTENT */}
-
-      <div className="doc-content">
-
-        <div className="doc-card-top">
-
-          <div className="doc-tag">
-            {tag}
-          </div>
-
-          <a
-            href={href}
-            target="_blank"
-            rel="noreferrer"
-            className="doc-icon"
-            aria-label={`Open ${title}`}
-          >
-            <svg
-              viewBox="0 0 24 24"
-              width="16"
-              height="16"
-              fill="none"
-            >
-              <path
-                d="M12 3v12m0 0l-4.5-4.5M12 15l4.5-4.5M4 19h16"
-                stroke="currentColor"
-                strokeWidth="1.6"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-              />
-            </svg>
-          </a>
-
-        </div>
-
-        <h3>
-          {title}
-        </h3>
-
-        <p>
-          {desc}
-        </p>
-
-        <div className="doc-meta">
-
-          <span>
-            {meta}
-          </span>
-
-          <a
-            href={href}
-            target="_blank"
-            rel="noreferrer"
-            className="doc-cta"
-          >
-            View PDF →
-          </a>
-
-        </div>
-
-      </div>
-
-    </article>
-  );
-}
-
-/* ---------------------------------------------------------------
-   PROMOTER
----------------------------------------------------------------- */
-
-function PromoterCard({
-  initials,
-  name,
-  father,
-  address,
-  role,
-}) {
+function PromoterCard({ initials, name, father, address, role }) {
   return (
     <div className="promoter-card reveal">
-
-      <div className="avatar">
-        {initials}
-      </div>
-
-      <h3>
-        {name}
-      </h3>
-
-      <p className="promoter-role">
-        {role}
-      </p>
-
+      <div className="avatar">{initials}</div>
+      <h3>{name}</h3>
+      <p className="promoter-role">{role}</p>
       <dl>
-
-        <dt>
-          Father's name
-        </dt>
-
-        <dd>
-          {father}
-        </dd>
-
-        <dt>
-          Address
-        </dt>
-
-        <dd>
-          {address}
-        </dd>
-
+        <dt>Father&rsquo;s name</dt>
+        <dd>{father}</dd>
+        <dt>Address</dt>
+        <dd>{address}</dd>
       </dl>
-
     </div>
   );
 }
 
-/* ---------------------------------------------------------------
-   MAIN COMPONENT
----------------------------------------------------------------- */
-
 export default function PoojaCity() {
-
   useReveal();
-
-  const [navSolid, setNavSolid] =
-    useState(false);
-
-  const [menuOpen, setMenuOpen] =
-    useState(false);
-
-  /* NAV SCROLL */
+  const [navSolid, setNavSolid] = useState(false);
+  const [menuOpen, setMenuOpen] = useState(false);
 
   useEffect(() => {
-
-    const onScroll = () => {
-      setNavSolid(window.scrollY > 40);
-    };
-
-    window.addEventListener(
-      "scroll",
-      onScroll
-    );
-
-    return () => {
-      window.removeEventListener(
-        "scroll",
-        onScroll
-      );
-    };
-
+    const onScroll = () => setNavSolid(window.scrollY > 40);
+    window.addEventListener("scroll", onScroll);
+    return () => window.removeEventListener("scroll", onScroll);
   }, []);
 
-  /* BODY LOCK */
-
   useEffect(() => {
-
-    document.body.style.overflow =
-      menuOpen ? "hidden" : "";
-
-    return () => {
-      document.body.style.overflow = "";
-    };
-
+    document.body.style.overflow = menuOpen ? "hidden" : "";
   }, [menuOpen]);
 
-  const closeMenu = () => {
-    setMenuOpen(false);
-  };
+  const closeMenu = () => setMenuOpen(false);
 
   return (
-
     <div className="pc-root">
-
       <style>{`
-
         @import url('https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,300;9..144,500;9..144,600;9..144,700&family=Space+Grotesk:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap');
 
-
-        /* =====================================================
-           GLOBAL
-        ===================================================== */
-
         .pc-root {
-
-          --ink:#29483D;
-          --ink2:#365B4E;
-
-          --terracotta:#C8754C;
-          --gold:#B4934B;
-
-          --parchment:#FBF8F1;
-          --sage:#7F9B8A;
-
-          --line:#E6DDCF;
-          --text:#2C302B;
-
-          font-family:
-            'Space Grotesk',
-            sans-serif;
-
-          background:#FBF9F4;
-
+          --ink:#16262A; --terracotta:#B0552F; --gold:#C79A3D;
+          --parchment:#F7F3E8; --surface:#FFFFFF; --surface2:#EFE6D2;
+          --sage:#5F7C68; --line:#E3DAC4; --text:#221D17;
+          font-family:'Space Grotesk', sans-serif;
+          background:var(--parchment);
           color:var(--text);
-
           width:100%;
-
           overflow-x:hidden;
         }
+        .pc-root * { box-sizing:border-box; }
+        .mono { font-family:'IBM Plex Mono', monospace; letter-spacing:0.03em; }
+        .display { font-family:'Fraunces', serif; }
 
-
-        .pc-root * {
-          box-sizing:border-box;
-        }
-
-
-        html {
-          scroll-behavior:smooth;
-        }
-
-
-        body {
-          margin:0;
-          padding:0;
-        }
-
-
-        .mono {
-          font-family:
-            'IBM Plex Mono',
-            monospace;
-
-          letter-spacing:.03em;
-        }
-
-
-        .display {
-          font-family:
-            'Fraunces',
-            serif;
-        }
-
-
-        /* =====================================================
-           NAV
-        ===================================================== */
-
+        /* ---------- nav ---------- */
         .nav {
-
-          position:fixed;
-
-          top:0;
-          left:0;
-          right:0;
-
-          z-index:100;
-
-          display:flex;
-
-          align-items:center;
-
-          justify-content:space-between;
-
-          gap:20px;
-
-          padding:
-            18px 6vw;
-
+          position:fixed; top:0; left:0; right:0; z-index:50;
+          display:flex; align-items:center; justify-content:space-between;
+          padding:18px 6vw; transition:background .3s ease, padding .3s ease, box-shadow .3s ease;
           background:transparent;
-
-          transition:
-            background .3s ease,
-            padding .3s ease,
-            box-shadow .3s ease;
         }
-
-
-        .nav.solid {
-
-          background:
-            rgba(41,72,61,.97);
-
-          padding:
-            12px 6vw;
-
-          box-shadow:
-            0 6px 24px
-            rgba(0,0,0,.15);
-
-          backdrop-filter:
-            blur(8px);
-        }
-
-
-        .nav-mark {
-
-          display:flex;
-
-          align-items:center;
-
-          gap:10px;
-
-          color:
-            var(--parchment);
-
-          font-family:
-            'Fraunces',
-            serif;
-
-          font-weight:600;
-
-          font-size:1.15rem;
-
-          white-space:nowrap;
-        }
-
-
-        .nav-links {
-
-          display:flex;
-
-          gap:28px;
-
-          align-items:center;
-        }
-
-
-        .nav-links a {
-
-          color:
-            rgba(251,248,241,.78);
-
-          text-decoration:none;
-
-          font-size:.82rem;
-
-          letter-spacing:.08em;
-
-          text-transform:uppercase;
-
-          transition:
-            color .2s ease;
-        }
-
-
-        .nav-links a:hover {
-          color:var(--gold);
-        }
-
-
-        .nav-cta {
-
-          border:
-            1px solid var(--gold);
-
-          color:
-            var(--gold);
-
-          padding:
-            8px 16px;
-
-          font-size:.76rem;
-
-          letter-spacing:.06em;
-
-          text-transform:uppercase;
-
-          text-decoration:none;
-
-          transition:
-            all .2s ease;
-
-          white-space:nowrap;
-        }
-
-
-        .nav-cta:hover {
-
-          background:
-            var(--gold);
-
-          color:
-            var(--ink);
-        }
-
-
-        .nav-burger {
-
-          display:none;
-
-          width:34px;
-          height:24px;
-
-          position:relative;
-
-          background:none;
-
-          border:none;
-
-          padding:0;
-
-          cursor:pointer;
-        }
-
-
-        .nav-burger span {
-
-          position:absolute;
-
-          left:0;
-          right:0;
-
-          height:2px;
-
-          background:
-            var(--parchment);
-
-          transition:
-            transform .25s ease,
-            top .25s ease;
-        }
-
-
-        .nav-burger span:first-child {
-          top:3px;
-        }
-
-
-        .nav-burger span:last-child {
-          top:18px;
-        }
-
-
-        .nav-burger.is-open
-        span:first-child {
-
-          top:10px;
-
-          transform:
-            rotate(45deg);
-        }
-
-
-        .nav-burger.is-open
-        span:last-child {
-
-          top:10px;
-
-          transform:
-            rotate(-45deg);
-        }
-
-
-        /* =====================================================
-           MOBILE MENU
-        ===================================================== */
+        .nav.solid { background:rgba(255,255,255,0.92); padding:12px 6vw; box-shadow:0 6px 24px rgba(34,29,23,0.08); backdrop-filter:blur(6px); border-bottom:1px solid var(--line); }
+        .nav-mark { display:flex; align-items:center; gap:10px; color:var(--text); font-family:'Fraunces',serif; font-weight:600; font-size:1.15rem; }
+        .nav-mark .dot { width:9px; height:9px; background:var(--gold); border-radius:1px; transform:rotate(45deg); flex:none; }
+        .nav-links { display:flex; gap:28px; }
+        .nav-links a { color:rgba(34,29,23,0.75); text-decoration:none; font-size:0.82rem; letter-spacing:0.08em; text-transform:uppercase; transition:color .2s; }
+        .nav-links a:hover { color:var(--gold); }
+        .nav-cta { border:1px solid var(--terracotta); color:var(--terracotta); padding:8px 16px; font-size:0.78rem; letter-spacing:0.08em; text-transform:uppercase; text-decoration:none; transition:all .2s; }
+        .nav-cta:hover { background:var(--gold); color:var(--ink); }
+        .nav-burger { display:none; width:30px; height:20px; position:relative; background:none; border:none; padding:0; cursor:pointer; flex:none; }
+        .nav-burger span { position:absolute; left:0; right:0; height:1.6px; background:var(--text); transition:transform .25s ease, opacity .25s ease, top .25s ease; }
+        .nav-burger span:first-child { top:2px; }
+        .nav-burger span:last-child { top:16px; }
+        .nav-burger.is-open span:first-child { top:9px; transform:rotate(45deg); }
+        .nav-burger.is-open span:last-child { top:9px; transform:rotate(-45deg); }
 
         .mobile-menu {
-
-          position:fixed;
-
-          inset:0;
-
-          z-index:90;
-
-          background:
-            var(--ink);
-
-          display:flex;
-
-          flex-direction:column;
-
-          align-items:flex-start;
-
-          justify-content:center;
-
-          gap:6px;
-
-          padding:
-            0 8vw;
-
-          opacity:0;
-
-          pointer-events:none;
-
-          transform:
-            translateY(-8px);
-
-          transition:
-            opacity .28s ease,
-            transform .28s ease;
+          position:fixed; inset:0; z-index:49; background:var(--surface);
+          display:flex; flex-direction:column; align-items:flex-start; justify-content:center;
+          gap:6px; padding:0 8vw;
+          opacity:0; pointer-events:none; transform:translateY(-8px);
+          transition:opacity .28s ease, transform .28s ease;
         }
-
-
-        .mobile-menu.is-open {
-
-          opacity:1;
-
-          pointer-events:auto;
-
-          transform:
-            translateY(0);
-        }
-
-
+        .mobile-menu.is-open { opacity:1; pointer-events:auto; transform:translateY(0); }
         .mobile-menu a {
+          font-family:'Fraunces',serif; font-size:2rem; color:var(--text); text-decoration:none;
+          padding:12px 0; border-bottom:1px solid rgba(34,29,23,0.12); width:100%;
+        }
+        .mobile-menu-rera { margin-top:24px; color:var(--terracotta); font-size:0.8rem; letter-spacing:0.04em; }
+        .mobile-menu-mark { margin-bottom:24px; }
 
-          font-family:
-            'Fraunces',
-            serif;
-
-          font-size:2rem;
-
-          color:
-            var(--parchment);
-
-          text-decoration:none;
-
-          padding:12px 0;
-
-          border-bottom:
-            1px solid
-            rgba(251,248,241,.12);
-
-          width:100%;
+        @media (max-width:760px){
+          .nav-links{ display:none; }
+          .nav-cta{ display:none; }
+          .nav-burger{ display:block; }
         }
 
-
-        .mobile-menu-mark {
-          margin-bottom:24px;
-        }
-
-
-        .mobile-menu-rera {
-
-          margin-top:24px;
-
-          color:
-            var(--gold);
-
-          font-size:.8rem;
-
-          letter-spacing:.04em;
-        }
-
-
-        /* =====================================================
-           HERO
-        ===================================================== */
-
+        /* ---------- hero ---------- */
         .hero {
-
-          position:relative;
-
-          min-height:100vh;
-
-          background:
-            var(--ink);
-
-          display:flex;
-
-          flex-direction:column;
-
-          justify-content:center;
-
-          padding:
-            120px 6vw 80px;
-
-          overflow:hidden;
-
+          position:relative; min-height:100vh; background:var(--surface);
+          display:flex; flex-direction:column; justify-content:center;
+          padding:120px 6vw 80px; overflow:hidden;
           background-image:
-
-            linear-gradient(
-              180deg,
-              rgba(41,72,61,.56),
-              rgba(41,72,61,.94)
-            ),
-
-            url('/images/pooja-city-hero-background.svg');
-
-          background-size:
-            cover,
-            cover;
-
-          background-position:
-            center,
-            center;
-
-          background-repeat:
-            no-repeat,
-            no-repeat;
+            repeating-linear-gradient(0deg, rgba(34,29,23,0.045) 0 1px, transparent 1px 64px),
+            repeating-linear-gradient(90deg, rgba(34,29,23,0.045) 0 1px, transparent 1px 64px);
+          border-bottom:1px solid var(--line);
         }
-
-
-        .hero-inner {
-
-          position:relative;
-
-          z-index:2;
-
-          max-width:760px;
-        }
-
-
+        .hero-inner { position:relative; z-index:2; max-width:760px; }
         .eyebrow {
-
-          display:inline-flex;
-
-          align-items:center;
-
-          gap:10px;
-
-          color:
-            var(--gold);
-
-          font-size:.75rem;
-
-          letter-spacing:.18em;
-
-          text-transform:uppercase;
-
-          border:
-            1px solid
-            rgba(180,147,75,.55);
-
-          padding:
-            7px 14px;
-
-          margin-bottom:28px;
+          display:inline-flex; align-items:center; gap:10px;
+          color:var(--terracotta); font-size:0.75rem; letter-spacing:0.18em; text-transform:uppercase;
+          border:1px solid rgba(176,85,47,0.4); background:rgba(176,85,47,0.05); padding:7px 14px; margin-bottom:28px;
         }
-
-
-        .eyebrow::before {
-
-          content:'';
-
-          width:6px;
-
-          height:6px;
-
-          background:
-            var(--gold);
-
-          border-radius:50%;
-        }
-
-
+        .eyebrow::before { content:''; width:6px; height:6px; background:var(--terracotta); border-radius:50%; }
         .hero h1 {
-
-          font-family:
-            'Fraunces',
-            serif;
-
-          font-weight:600;
-
-          font-size:
-            clamp(
-              3rem,
-              8vw,
-              6.4rem
-            );
-
-          line-height:.96;
-
-          color:
-            var(--parchment);
-
-          margin:
-            0 0 22px;
+          font-family:'Fraunces', serif; font-weight:600; font-optical-sizing:auto;
+          font-size:clamp(3rem, 8vw, 6.4rem); line-height:0.96; color:var(--text); margin:0 0 22px;
+          letter-spacing:-0.01em;
         }
-
-
-        .hero h1 em {
-
-          font-style:italic;
-
-          color:
-            #D18A62;
-
-          font-weight:500;
-        }
-
-
-        .hero p.lede {
-
-          color:
-            rgba(251,248,241,.75);
-
-          font-size:1.15rem;
-
-          max-width:520px;
-
-          line-height:1.6;
-
-          margin:
-            0 0 40px;
-        }
-
-
-        .hero-actions {
-
-          display:flex;
-
-          gap:16px;
-
-          flex-wrap:wrap;
-
-          margin-bottom:56px;
-        }
-
-
+        .hero h1 em { font-style:italic; color:var(--terracotta); font-weight:500; }
+        .hero p.lede { color:rgba(34,29,23,0.68); font-size:1.15rem; max-width:520px; line-height:1.6; margin:0 0 40px; }
+        .hero-actions { display:flex; gap:16px; flex-wrap:wrap; margin-bottom:56px; }
         .btn {
+          font-family:'Space Grotesk',sans-serif; font-weight:600; font-size:0.9rem;
+          padding:15px 28px; text-decoration:none; letter-spacing:0.02em; cursor:pointer;
+          border:1px solid transparent; transition:all .22s ease; display:inline-flex; align-items:center; gap:10px;
+        }
+        .btn-primary { background:var(--terracotta); color:var(--parchment); }
+        .btn-primary:hover { background:#c66539; transform:translateY(-2px); }
+        .btn-ghost { border-color:rgba(34,29,23,0.28); color:var(--text); }
+        .btn-ghost:hover { border-color:var(--terracotta); color:var(--terracotta); }
 
-          font-family:
-            'Space Grotesk',
-            sans-serif;
+        .hero-rera { display:flex; gap:36px; flex-wrap:wrap; border-top:1px solid rgba(34,29,23,0.18); padding-top:24px; }
+        .hero-rera div span { display:block; }
+        .hero-rera .k { color:rgba(34,29,23,0.5); font-size:0.68rem; letter-spacing:0.14em; text-transform:uppercase; margin-bottom:6px; }
+        .hero-rera .v { color:var(--terracotta); font-size:0.95rem; }
 
-          font-weight:600;
-
-          font-size:.9rem;
-
-          padding:
-            15px 28px;
-
-          text-decoration:none;
-
-          letter-spacing:.02em;
-
-          cursor:pointer;
-
-          border:
-            1px solid transparent;
-
-          transition:
-            all .22s ease;
-
-          display:inline-flex;
-
-          align-items:center;
-
-          justify-content:center;
-
-          gap:10px;
+        @media (max-width:640px){
+          .hero{ min-height:auto; padding:96px 6vw 56px; }
+          .eyebrow{ font-size:0.65rem; padding:6px 10px; margin-bottom:20px; }
+          .hero h1{ font-size:2.5rem; line-height:1.04; margin-bottom:16px; }
+          .hero p.lede{ font-size:1rem; margin-bottom:28px; }
+          .hero-actions{ margin-bottom:36px; }
+          .btn{ padding:13px 22px; font-size:0.85rem; width:100%; justify-content:center; }
+          .hero-rera{ gap:20px 28px; }
         }
 
+        .plot-grid { position:absolute; right:-4%; top:50%; transform:translateY(-50%); width:56%; max-width:640px; opacity:0.9; z-index:1; }
+        @media (max-width:980px){ .plot-grid{ display:none; } }
+        .parcel { opacity:0; animation:fadeIn .8s ease forwards; }
+        @keyframes fadeIn { to { opacity:1; } }
+        .svg-label { fill:rgba(34,29,23,0.55); font-family:'IBM Plex Mono',monospace; font-size:9.5px; letter-spacing:0.08em; }
+        .svg-label--sage { fill:#93b39c; }
+        .svg-parcel-id { fill:var(--terracotta); font-family:'IBM Plex Mono',monospace; font-size:12px; letter-spacing:0.05em; }
+        .svg-parcel-sub { fill:rgba(34,29,23,0.4); font-family:'IBM Plex Mono',monospace; font-size:8px; letter-spacing:0.12em; }
 
-        .btn-primary {
+        /* ---------- reveal ---------- */
+        .reveal { opacity:0; transform:translateY(22px); transition:opacity .7s ease, transform .7s ease; }
+        .reveal.is-in { opacity:1; transform:translateY(0); }
 
-          background:
-            var(--terracotta);
+        /* ---------- section shell ---------- */
+        section.block { padding:110px 6vw; position:relative; }
+        .kicker { font-family:'IBM Plex Mono',monospace; font-size:0.75rem; letter-spacing:0.16em; text-transform:uppercase; color:var(--terracotta); margin-bottom:14px; display:block; }
+        h2.h-title { font-family:'Fraunces',serif; font-weight:600; font-size:clamp(2rem,4vw,3rem); margin:0 0 20px; letter-spacing:-0.01em; }
+        .lead-text { font-size:1.05rem; line-height:1.75; color:#463c31; max-width:640px; }
 
-          color:
-            var(--parchment);
+        /* ---------- stats strip ---------- */
+        .stats-strip { background:var(--surface2); padding:56px 6vw; display:flex; flex-wrap:wrap; gap:0; border-bottom:1px solid var(--line); }
+        .stat { flex:1 1 200px; padding:0 32px; border-left:1px solid rgba(34,29,23,0.15); }
+        .stat:first-child { border-left:none; padding-left:0; }
+        .stat-value { font-family:'Fraunces',serif; font-weight:600; font-size:2.6rem; color:var(--terracotta); line-height:1; }
+        .stat-label { color:rgba(34,29,23,0.6); font-size:0.78rem; letter-spacing:0.06em; text-transform:uppercase; margin-top:10px; }
+        @media (max-width:760px){ .stat{ border-left:none; border-top:1px solid rgba(34,29,23,0.15); padding:20px 0 0; margin-top:20px; } }
+
+        /* ---------- about / grid diagram section ---------- */
+        .about-wrap { display:grid; grid-template-columns:1fr 1fr; gap:60px; align-items:center; }
+        @media (max-width:900px){ .about-wrap{ grid-template-columns:1fr; } }
+        .about-diagram { background:var(--surface); border:1px solid var(--line); padding:20px; position:relative; }
+        .about-diagram .plot-grid { position:static; transform:none; width:100%; opacity:1; }
+        .khasra-chips { display:flex; flex-wrap:wrap; gap:8px; margin-top:24px; }
+        .khasra-chips span { font-family:'IBM Plex Mono',monospace; font-size:0.75rem; border:1px solid var(--line); padding:6px 10px; color:var(--terracotta); }
+
+        /* ---------- location ---------- */
+        .location-block { background:var(--parchment); border-top:1px solid var(--line); border-bottom:1px solid var(--line); }
+        .loc-grid { display:grid; grid-template-columns:1.1fr 1fr; gap:60px; }
+        @media (max-width:900px){ .loc-grid{ grid-template-columns:1fr; } }
+        .loc-list { list-style:none; margin:32px 0 0; padding:0; display:flex; flex-direction:column; gap:22px; }
+        .loc-list li { display:flex; gap:18px; padding-bottom:22px; border-bottom:1px solid var(--line); }
+        .loc-list .li-label { font-family:'IBM Plex Mono',monospace; font-size:0.7rem; letter-spacing:0.1em; text-transform:uppercase; color:var(--sage); width:140px; flex:none; padding-top:2px; }
+        .loc-list .li-value { font-size:1rem; line-height:1.5; }
+        .map-card { background:var(--surface2); border:1px solid var(--line); color:var(--text); position:relative; overflow:hidden; }
+        .map-card::after { content:''; position:absolute; inset:0; background-image:repeating-linear-gradient(0deg, rgba(199,154,61,0.06) 0 1px, transparent 1px 40px), repeating-linear-gradient(90deg, rgba(199,154,61,0.06) 0 1px, transparent 1px 40px); pointer-events:none; }
+        .map-embed { width:100%; height:260px; position:relative; border-bottom:1px solid var(--line); }
+        .map-embed iframe { width:100%; height:100%; border:0; display:block; filter:grayscale(15%) contrast(1.02) saturate(0.9); }
+        .map-card .mc-inner { position:relative; z-index:1; padding:32px 40px 40px; }
+        .map-card h3 { font-family:'Fraunces',serif; font-size:1.5rem; margin:0 0 12px; }
+        .map-card .pin {
+          display:inline-flex; align-items:center; gap:8px; color:var(--terracotta);
+          font-family:'IBM Plex Mono',monospace; font-size:0.8rem; margin-top:20px;
+          text-decoration:none; border-bottom:1px solid rgba(176,85,47,0.35); padding-bottom:2px;
+          transition:border-color .2s;
         }
+        .map-card .pin:hover { border-color:var(--terracotta); }
 
+        /* ---------- approvals ---------- */
+        .approval-grid { display:grid; grid-template-columns:1fr 1fr; gap:28px; margin-top:48px; }
+        @media (max-width:840px){ .approval-grid{ grid-template-columns:1fr; } }
+        .approval-card { background:#fff; border:1px solid var(--line); padding:36px; position:relative; }
+        .approval-card .ac-seal { position:absolute; top:32px; right:32px; width:52px; height:52px; border:1.4px solid var(--gold); border-radius:50%; display:flex; align-items:center; justify-content:center; font-family:'IBM Plex Mono',monospace; font-size:0.6rem; color:var(--gold); text-align:center; line-height:1.1; }
+        .approval-card h3 { font-family:'Fraunces',serif; font-size:1.4rem; margin:0 0 6px; padding-right:70px; }
+        .approval-card .ac-sub { font-family:'IBM Plex Mono',monospace; font-size:0.72rem; color:var(--terracotta); letter-spacing:0.05em; margin-bottom:22px; display:block; }
+        .approval-card ul { margin:0; padding-left:18px; display:flex; flex-direction:column; gap:10px; }
+        .approval-card li { font-size:0.92rem; line-height:1.55; color:#463c31; }
+        .approval-card .ac-foot { margin-top:24px; padding-top:18px; border-top:1px solid var(--line); font-family:'IBM Plex Mono',monospace; font-size:0.72rem; color:#6b6153; display:flex; justify-content:space-between; flex-wrap:wrap; gap:8px; }
 
-        .btn-primary:hover {
-
-          background:
-            #D58760;
-
-          transform:
-            translateY(-2px);
+        /* ---------- promoters ---------- */
+        .promoter-block {
+          background:var(--surface2);
+          border-top:1px solid var(--line); border-bottom:1px solid var(--line);
         }
+        .promoter-grid { display:grid; grid-template-columns:repeat(2,1fr); gap:28px; margin-top:48px; }
+        @media (max-width:760px){ .promoter-grid{ grid-template-columns:1fr; } }
+        .promoter-card { background:#fff; border:1px solid var(--line); padding:36px; }
+        .avatar { width:56px; height:56px; border:1.4px solid var(--gold); color:var(--gold); font-family:'Fraunces',serif; font-size:1.2rem; display:flex; align-items:center; justify-content:center; margin-bottom:20px; }
+        .promoter-card h3 { font-family:'Fraunces',serif; color:var(--text); font-size:1.3rem; margin:0 0 4px; }
+        .promoter-role { color:var(--terracotta); font-size:0.78rem; letter-spacing:0.08em; text-transform:uppercase; margin:0 0 20px; }
+        .promoter-card dl { margin:0; display:flex; flex-direction:column; gap:14px; }
+        .promoter-card dt { font-family:'IBM Plex Mono',monospace; font-size:0.68rem; letter-spacing:0.1em; text-transform:uppercase; color:rgba(34,29,23,0.45); margin-bottom:4px; }
+        .promoter-card dd { margin:0; color:rgba(34,29,23,0.85); font-size:0.92rem; line-height:1.5; }
 
-
-        .btn-ghost {
-
-          border-color:
-            rgba(251,248,241,.35);
-
-          color:
-            var(--parchment);
+        /* ---------- documents ---------- */
+        .doc-grid { display:flex; flex-direction:column; gap:28px; margin-top:48px; }
+        .doc-card {
+          display:block; border:1px solid var(--line); background:#fff; padding:30px;
+          transition:border-color .2s, transform .2s, box-shadow .2s;
         }
-
-
-        .btn-ghost:hover {
-
-          border-color:
-            var(--gold);
-
-          color:
-            var(--gold);
+        .doc-card:hover { border-color:var(--terracotta); transform:translateY(-4px); box-shadow:0 14px 30px rgba(22,38,42,0.1); }
+        .doc-card-top { display:flex; align-items:center; justify-content:space-between; margin-bottom:16px; }
+        .doc-icon {
+          width:30px; height:30px; border:1px solid var(--line); border-radius:50%;
+          display:flex; align-items:center; justify-content:center; color:var(--terracotta);
+          transition:background .2s, color .2s, border-color .2s;
         }
-
-
-        .hero-rera {
-
-          display:flex;
-
-          gap:36px;
-
-          flex-wrap:wrap;
-
-          border-top:
-            1px solid
-            rgba(251,248,241,.18);
-
-          padding-top:24px;
+        .doc-card:hover .doc-icon { background:var(--terracotta); color:#fff; border-color:var(--terracotta); }
+        .doc-tag { font-family:'IBM Plex Mono',monospace; font-size:0.68rem; letter-spacing:0.1em; text-transform:uppercase; color:var(--terracotta); border:1px solid var(--terracotta); display:inline-block; padding:4px 10px; margin:0; }
+        .doc-card h3 { font-family:'Fraunces',serif; font-size:1.2rem; margin:0 0 10px; color:var(--text); }
+        .doc-card p { font-size:0.9rem; color:#584e40; line-height:1.55; margin:0 0 16px; }
+        .doc-meta {
+          font-family:'IBM Plex Mono',monospace; font-size:0.72rem; color:var(--sage);
+          border-top:1px solid var(--line); padding-top:14px;
+          display:flex; align-items:center; justify-content:space-between; gap:10px; flex-wrap:wrap;
         }
+        .doc-cta { color:var(--terracotta); font-weight:500; white-space:nowrap; }
+        .doc-card-embed { margin-top:22px; padding-top:22px; border-top:1px dashed var(--line); }
+        .btn-small { padding:10px 18px; font-size:0.78rem; margin-top:14px; display:inline-flex; }
 
-
-        .hero-rera div span {
-          display:block;
+        /* ---------- pdf viewer ---------- */
+        .pdf-viewer iframe {
+          width:100%; height:700px; border:1px solid var(--line); background:#fff; display:block;
         }
-
-
-        .hero-rera .k {
-
-          color:
-            rgba(251,248,241,.5);
-
-          font-size:.68rem;
-
-          letter-spacing:.14em;
-
-          text-transform:uppercase;
-
-          margin-bottom:6px;
+        .pdf-viewer-fallback { font-size:0.74rem; color:#6b6153; margin-top:10px; }
+        .pdf-viewer-fallback a { color:var(--terracotta); }
+        .rera-cert-block .pdf-viewer iframe { height:820px; }
+        .doc-card-embed .pdf-viewer iframe { height:620px; }
+        @media (max-width:640px){
+          .rera-cert-block .pdf-viewer iframe { height:70vh; min-height:420px; }
+          .doc-card-embed .pdf-viewer iframe { height:65vh; min-height:380px; }
         }
+        .pdf-actions { display:flex; gap:14px; flex-wrap:wrap; margin-top:22px; }
 
+        /* ---------- footer ---------- */
+        footer.pc-footer { background:var(--surface2); color:rgba(34,29,23,0.6); padding:70px 6vw 34px; border-top:1px solid var(--line); }
+        .footer-top { display:grid; grid-template-columns:1.3fr 1fr 1fr; gap:40px; padding-bottom:44px; border-bottom:1px solid rgba(34,29,23,0.14); }
+        @media (max-width:760px){ .footer-top{ grid-template-columns:1fr; } }
+        .footer-top h4 { font-family:'Fraunces',serif; color:var(--text); font-size:1.5rem; margin:0; }
+        .footer-mark { display:flex; align-items:center; gap:12px; margin-bottom:14px; }
+        .footer-top p { font-size:0.9rem; line-height:1.6; max-width:340px; }
+        .footer-col-title { font-family:'IBM Plex Mono',monospace; font-size:0.7rem; letter-spacing:0.1em; text-transform:uppercase; color:var(--terracotta); margin-bottom:16px; }
+        .footer-col p, .footer-col a { font-size:0.9rem; line-height:1.7; color:rgba(34,29,23,0.65); text-decoration:none; display:block; }
+        .footer-bottom { display:flex; justify-content:space-between; flex-wrap:wrap; gap:12px; padding-top:26px; font-size:0.76rem; letter-spacing:0.03em; }
 
-        .hero-rera .v {
+        .fade-note { font-size:0.78rem; color:#7a705f; margin-top:10px; }
 
-          color:
-            var(--gold);
+        /* ---------- mobile: sections, stats, cards ---------- */
+        @media (max-width:640px){
+          section.block{ padding:64px 6vw; }
+          h2.h-title{ font-size:2rem; margin-bottom:16px; }
+          .lead-text{ font-size:0.95rem; }
 
-          font-size:.95rem;
+          .stats-strip{ padding:36px 6vw; }
+          .stat{ flex:1 1 45%; padding:0 0 0 16px; border-left:1px solid rgba(34,29,23,0.15); margin-bottom:20px; }
+          .stat:nth-child(odd){ padding-left:0; border-left:none; }
+          .stat-value{ font-size:1.8rem; }
+
+          .about-wrap{ gap:36px; }
+          .about-diagram{ padding:12px; }
+          .khasra-chips{ gap:6px; }
+          .khasra-chips span{ font-size:0.68rem; padding:5px 8px; }
+
+          .loc-list li{ flex-direction:column; gap:6px; padding-bottom:16px; }
+          .loc-list .li-label{ width:auto; }
+          .map-card .mc-inner{ padding:24px; }
+          .map-embed{ height:200px; }
+
+          .approval-card{ padding:24px; }
+          .approval-card .ac-seal{ width:42px; height:42px; top:22px; right:22px; font-size:0.55rem; }
+          .approval-card h3{ font-size:1.15rem; padding-right:52px; }
+
+          .promoter-card{ padding:26px; }
+
+          .doc-card{ padding:20px; }
+          .doc-card h3{ font-size:1.05rem; }
+          .pdf-actions, .pdf-actions-card{ flex-direction:column; }
+          .pdf-actions .btn, .pdf-actions-card .btn{ width:100%; justify-content:center; }
+          .rera-cert-block{ padding-left:5vw; padding-right:5vw; }
+
+          footer.pc-footer{ padding:56px 6vw 26px; }
+          .footer-top{ gap:32px; padding-bottom:32px; }
+          .footer-top h4{ font-size:1.3rem; }
+          .footer-bottom{ flex-direction:column; gap:6px; }
         }
+      `}</style>
 
+      {/* NAV */}
+      <nav className={`nav ${navSolid ? "solid" : ""}`}>
+        <div className="nav-mark"><LogoMark size={30} /> POOJA CITY</div>
+        <div className="nav-links">
+          <a href="#about">Overview</a>
+          <a href="#rera-certificate">Certificate</a>
+          <a href="#location">Location</a>
+          <a href="#approvals">Approvals</a>
+          <a href="#promoters">Promoters</a>
+          <a href="#documents">Documents</a>
+        </div>
+        <a className="nav-cta" href="#documents">RERA: PCGRERA090226002040</a>
+        <button
+          className={`nav-burger ${menuOpen ? "is-open" : ""}`}
+          aria-label={menuOpen ? "Close menu" : "Open menu"}
+          aria-expanded={menuOpen}
+          onClick={() => setMenuOpen((v) => !v)}
+        >
+          <span />
+          <span />
+        </button>
+      </nav>
 
-        .plot-grid {
+      <div className={`mobile-menu ${menuOpen ? "is-open" : ""}`}>
+        <div className="mobile-menu-mark"><LogoMark size={40} /></div>
+        <a href="#about" onClick={closeMenu}>Overview</a>
+        <a href="#rera-certificate" onClick={closeMenu}>Certificate</a>
+        <a href="#location" onClick={closeMenu}>Location</a>
+        <a href="#approvals" onClick={closeMenu}>Approvals</a>
+        <a href="#promoters" onClick={closeMenu}>Promoters</a>
+        <a href="#documents" onClick={closeMenu}>Documents</a>
+        <div className="mobile-menu-rera mono">RERA: PCGRERA090226002040</div>
+      </div>
 
-          position:absolute;
+      {/* HERO */}
+      <header className="hero">
+        <PlotGrid />
+        <div className="hero-inner">
+          <div className="eyebrow">CG-RERA Registered · Reg. No. PCGRERA090226002040</div>
+          <h1>Pooja City<br /><em>Commercial</em> Plotted Development</h1>
+          <p className="lede">
+            0.493 hectares of RERA-registered commercial plots at Lal Khadan, Torwa —
+            fronting the 60 m Nehru Chowk–Dardighat Marg in Bilaspur, Chhattisgarh.
+          </p>
+          <div className="hero-actions">
+            <a className="btn btn-primary" href="#documents">View official documents</a>
+            <a className="btn btn-ghost" href="#location">See the location</a>
+          </div>
+          <div className="hero-rera">
+            <div><span className="k">Registered</span><span className="v mono">09 Feb 2026</span></div>
+            <div><span className="k">Valid till</span><span className="v mono">27 Dec 2030</span></div>
+            <div><span className="k">Authority</span><span className="v mono">CG-RERA, Raipur</span></div>
+          </div>
+        </div>
+      </header>
 
-          right:-4%;
+      {/* RERA CERTIFICATE — full document, viewable inline */}
+      <section className="block rera-cert-block" id="rera-certificate">
+        <span className="kicker">— The RERA Certificate</span>
+        <h2 className="h-title">See it for yourself.</h2>
+        <p className="lead-text">
+          No summary needed here — this is the actual Form-C certificate issued by
+          Chhattisgarh RERA, Reg. No. PCGRERA090226002040, registering Pooja City under
+          the RERA Act, 2016.
+        </p>
+        <PdfViewer src="/documents/rera-registration-certificate.pdf" />
+        <div className="pdf-actions">
+          <a className="btn btn-primary" href="/documents/rera-registration-certificate.pdf" target="_blank" rel="noreferrer">Open full document</a>
+          <a className="btn btn-ghost" href="/documents/rera-registration-certificate.pdf" download>Download PDF</a>
+        </div>
+      </section>
 
-          top:50%;
+      {/* STATS */}
+      <div className="stats-strip">
+        <Stat value="0.493 Ha" label="Total land parcel" />
+        <Stat value="0.325 Ha" label="Commercial plotting area" />
+        <Stat value="60 m" label="Frontage road (ROW)" />
+        <Stat value="5" label="Khasra parcels combined" />
+      </div>
 
-          transform:
-            translateY(-50%);
+      {/* ABOUT */}
+      <section className="block" id="about">
+        <div className="about-wrap">
+          <div className="reveal">
+            <span className="kicker">01 — The Development</span>
+            <h2 className="h-title">Five parcels,<br />one registered address.</h2>
+            <p className="lead-text">
+              Pooja City consolidates khasra parcels 1368/1, 1368/3, 1369/1, 1369/3 and
+              1371/2 in village Torva into a single commercial-plotting layout, approved by
+              the Joint Director of Town &amp; Country Planning, Bilaspur Regional, under
+              letter no. CG/BSP/TNCP/PLC/2025/0024 dated 4 December 2025.
+            </p>
+            <p className="lead-text" style={{ marginTop: 16 }}>
+              Of the 0.4930 hectare parcel, 0.324989 hectare is sanctioned for commercial
+              (plotting) development, set back 30 metres from the mid-line of the adjoining
+              60 m wide Nehru Chowk–Dardighat road.
+            </p>
+            <div className="khasra-chips">
+              {KHASRAS.map((k) => <span key={k} className="mono">KH {k}</span>)}
+            </div>
+          </div>
+          <div className="about-diagram reveal">
+            <PlotGrid />
+          </div>
+        </div>
+      </section>
 
-          width:56%;
+      {/* LOCATION */}
+      <section className="block location-block" id="location">
+        <div className="loc-grid">
+          <div className="reveal">
+            <span className="kicker">02 — Location &amp; Access</span>
+            <h2 className="h-title">Torwa, Bilaspur —<br />on the Dardighat corridor.</h2>
+            <ul className="loc-list">
+              <li><span className="li-label">Site address</span><span className="li-value">Lal Khadan, Torwa, District Bilaspur, Chhattisgarh</span></li>
+              <li><span className="li-label">Landmark</span><span className="li-value">Near Lal Khadan ROB, off Nehru Chowk</span></li>
+              <li><span className="li-label">Frontage road</span><span className="li-value">Nehru Chowk–Dardighat Marg, proposed width 60.00 m</span></li>
+              <li><span className="li-label">Revenue detail</span><span className="li-value">Halka No. 00037 · RI No. 01 · Tehsil &amp; District Bilaspur</span></li>
+              <li><span className="li-label">Registered office</span><span className="li-value">Near Subhash Chandra Bose Garden, Dhan Mandi Road, Torwa, Bilaspur — 495004</span></li>
+            </ul>
+          </div>
+          <div className="map-card reveal">
+            <div className="map-embed">
+              <iframe
+                title="Pooja City site location"
+                src="https://www.google.com/maps?q=Lal+Khadan,+Torwa,+Bilaspur,+Chhattisgarh+495004&output=embed"
+                loading="lazy"
+                referrerPolicy="no-referrer-when-downgrade"
+              />
+            </div>
+            <div className="mc-inner">
+              <h3>Site reference</h3>
+              <p style={{ fontSize: "0.92rem", lineHeight: 1.6, color: "rgba(34,29,23,0.72)" }}>
+                Approved under the CG Nagar Tatha Gram Nivesh (Amendment &amp; Validation)
+                Act, 2017 — Section 30(3), read with Rule 27 of the CG Bhoomi Vikas Niyam,
+                1984. Development permission requires a 60 m building line and a further
+                30 m setback along the frontage road.
+              </p>
+              <a
+                className="pin"
+                href="https://www.google.com/maps/search/?api=1&query=Lal+Khadan,+Torwa,+Bilaspur,+Chhattisgarh+495004"
+                target="_blank"
+                rel="noreferrer"
+              >
+                ◆ Open Lal Khadan, Torwa in Google Maps →
+              </a>
+            </div>
+          </div>
+        </div>
+      </section>
 
-          max-width:640px;
+      {/* APPROVALS */}
+      <section className="block" id="approvals">
+        <span className="kicker">03 — Approvals &amp; Compliance</span>
+        <h2 className="h-title">Registered, sanctioned,<br />on record.</h2>
+        <p className="lead-text">
+          Every plot at Pooja City sits behind two government approvals — a development
+          permission from the Town &amp; Country Planning department, and a project
+          registration from the Chhattisgarh Real Estate Regulatory Authority.
+        </p>
 
-          opacity:.9;
+        <div className="approval-grid">
+          <div className="approval-card reveal">
+            <div className="ac-seal">CG<br />RERA</div>
+            <h3>RERA Registration Certificate</h3>
+            <span className="ac-sub mono">FORM-C · Rule 6(1) · Reg. No. PCGRERA090226002040</span>
+            <ul>
+              <li>Granted under Section 5 of the Real Estate (Regulation &amp; Development) Act, 2016.</li>
+              <li>Valid for 4 years, 10 months, 13 days — 9 Feb 2026 to 27 Dec 2030.</li>
+              <li>Promoter must deposit 70% of realised amounts in a separate account for construction and land cost.</li>
+              <li>Sale agreements and conveyance deeds to be executed as per Sections 13 &amp; 17.</li>
+            </ul>
+            <div className="ac-foot">
+              <span>Issued by Registrar, CG-RERA, Raipur</span>
+              <span>Dated 09 Feb 2026</span>
+            </div>
+          </div>
 
-          z-index:1;
-        }
+          <div className="approval-card reveal">
+            <div className="ac-seal">TNCP<br />BSP</div>
+            <h3>Development Permission</h3>
+            <span className="ac-sub mono">Letter No. CG/BSP/TNCP/PLC/2025/0024</span>
+            <ul>
+              <li>Commercial plotting sanctioned on 0.324989 Ha of the 0.4930 Ha parcel.</li>
+              <li>60 m building line and 30 m road-mid setback to be maintained.</li>
+              <li>Plantation, rainwater harvesting, solar lighting (25% of open-area lighting) and fire-safety (NBC Part 4) norms apply.</li>
+              <li>Permission is valid 3 years from issue, renewable annually up to 5 years; plots may be sold only after RERA registration.</li>
+            </ul>
+            <div className="ac-foot">
+              <span>Joint Director, Town &amp; Country Planning, Bilaspur Regional</span>
+              <span>Dated 04 Dec 2025</span>
+            </div>
+          </div>
+        </div>
+      </section>
 
+      {/* PROMOTERS */}
+      <section className="block promoter-block" id="promoters">
+        <span className="kicker">04 — Promoters</span>
+        <h2 className="h-title">The developers on record.</h2>
+        <p className="lead-text">As named in the RERA registration certificate and Annexure-13 of the project filing.</p>
+        <div className="promoter-grid">
+          <PromoterCard
+            initials="MKS"
+            name="Manoj Kumar Sidara"
+            role="Promoter"
+            father="Shri Chand Sidara"
+            address="Near Subhash Chand Bose Garden, Dhan Mandi Road, Torwa, Bilaspur"
+          />
+          <PromoterCard
+            initials="PRS"
+            name="Prithvi Raj Sidara"
+            role="Promoter"
+            father="Shri Chand Sidara"
+            address="Near Subhash Chand Bose Garden, Dhan Mandi Road, Torwa, Bilaspur"
+          />
+        </div>
+        <p className="fade-note">PAN and Aadhaar details are filed with CG-RERA (Annexure-13) and withheld here for the promoters' privacy.</p>
+      </section>
 
-        .parcel {
+      {/* DOCUMENTS */}
+      <section className="block" id="documents">
+        <span className="kicker">05 — Documents</span>
+        <h2 className="h-title">Official record, unredacted.</h2>
+        <p className="lead-text">The three filings this page is built from — issued by CG-RERA and the Directorate of Town &amp; Country Planning.</p>
+        <div className="doc-grid">
+          <DocCard
+            tag="Form-C"
+            title="RERA Registration Certificate"
+            desc="Chhattisgarh RERA's Form-C certificate registering Pooja City under the RERA Act, 2016, with validity and promoter conditions."
+            meta="Reg. No. PCGRERA090226002040 · Raipur"
+            href="/documents/rera-registration-certificate.pdf"
+          />
+          <DocCard
+            tag="TNCP Approval"
+            title="Town &amp; Country Planning Permission"
+            desc="Development permission for commercial plotting, with the full 33-point condition schedule from the Bilaspur Regional TNCP office."
+            meta="Letter No. CG/BSP/TNCP/PLC/2025/0024"
+            href="/documents/tncp-development-permission.pdf"
+          />
+          <DocCard
+            tag="Annexure-13"
+            title="Promoter Details"
+            desc="Statutory promoter-details annexure naming Manoj Kumar Sidara and Prithvi Raj Sidara as the project's promoters."
+            meta="Annexure-13 · Photograph identification"
+            href="/documents/promoter-details-annexure-13.pdf"
+          />
+        </div>
+      </section>
 
-          opacity:0;
-
-          animation:
-            fadeIn .8s ease forwards;
-        }
-
-
-        @keyframes fadeIn {
-          to
+      {/* FOOTER */}
+      <footer className="pc-footer">
+        <div className="footer-top">
+          <div>
+            <div className="footer-mark"><LogoMark size={38} /><h4>Pooja City</h4></div>
+            <p>Commercial plotted development at Lal Khadan, Torwa, District Bilaspur, Chhattisgarh — registered with CG-RERA under Reg. No. PCGRERA090226002040.</p>
+          </div>
+          <div className="footer-col">
+            <div className="footer-col-title">Registered Office</div>
+            <p>Near Subhash Chandra Bose Garden,<br />Dhan Mandi Road, Torwa,<br />Bilaspur, Chhattisgarh — 495004</p>
+          </div>
+          <div className="footer-col">
+            <div className="footer-col-title">Authorities</div>
+            <p>CG-RERA, Raipur</p>
+            <p>Joint Director, Town &amp; Country Planning,<br />Bilaspur Regional (C.G.)</p>
+          </div>
+        </div>
+        <div className="footer-bottom">
+          <span>© Pooja City — Manoj Kumar Sidara &amp; Prithvi Raj Sidara, Promoters</span>
+          <span className="mono">RERA Reg. PCGRERA090226002040</span>
+        </div>
+      </footer>
+    </div>
+  );
+}
