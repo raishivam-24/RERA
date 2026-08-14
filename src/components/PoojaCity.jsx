@@ -8,7 +8,7 @@ import React, { useEffect, useState } from "react";
    Surface-2  #EFE6D2   warm cream secondary panel
    Terracotta #B0552F   Chhattisgarh soil / brick — primary accent
    Gold       #C79A3D   seal / certificate accent — secondary
-   Sage       #7C9885   land / plantation
+   Sage       #5F7C68   land / plantation / "verified" green
    Line       #E3DAC4   hairline
    Text-dark  #221D17   primary text
    Ink        #16262A   reserved for the logo mark only
@@ -33,9 +33,6 @@ function useReveal() {
 }
 
 function PlotGrid() {
-  // Signature element: a stylised cadastral plan of the five khasra
-  // parcels that make up the project, with the 30m road-setback line
-  // called out — literally "plotted development".
   return (
     <svg viewBox="0 0 640 460" className="plot-grid" aria-hidden="true">
       <defs>
@@ -43,17 +40,11 @@ function PlotGrid() {
           <line x1="0" y1="0" x2="0" y2="7" stroke="rgba(199,154,61,0.35)" strokeWidth="1" />
         </pattern>
       </defs>
-
-      {/* road */}
       <rect x="0" y="0" width="640" height="70" fill="rgba(34,29,23,0.06)" />
       <line x1="0" y1="35" x2="640" y2="35" stroke="#C79A3D" strokeWidth="1.4" strokeDasharray="10 8" />
       <text x="16" y="22" className="svg-label">NEHRU CHOWK — DARDIGHAT MARG · 60.00 M ROW</text>
-
-      {/* setback line */}
       <line x1="0" y1="105" x2="640" y2="105" stroke="#7C9885" strokeWidth="1.2" strokeDasharray="3 5" />
       <text x="16" y="98" className="svg-label svg-label--sage">30.00 M SETBACK FROM ROAD MID-LINE</text>
-
-      {/* five parcels */}
       {[
         { x: 30, y: 130, w: 220, h: 140, id: "1368/1" },
         { x: 270, y: 130, w: 150, h: 140, id: "1368/3" },
@@ -71,7 +62,6 @@ function PlotGrid() {
           </text>
         </g>
       ))}
-
       <text x="16" y="446" className="svg-label">TOTAL AREA 0.4930 HA · COMMERCIAL PLOTTING 0.324989 HA</text>
     </svg>
   );
@@ -91,15 +81,119 @@ function LogoMark({ size = 34 }) {
   );
 }
 
-function PdfViewer({ src }) {
-  const viewerSrc = `${src}#view=FitH&toolbar=1`;
+/* ---------- small inline icons for certificate cards ---------- */
+function IconInstitution() {
   return (
-    <div className="pdf-viewer">
-      <iframe src={viewerSrc} title={src} loading="lazy" />
-      <div className="pdf-viewer-fallback mono">
-        Document not loading? <a href={src} target="_blank" rel="noreferrer">Open in a new tab</a> or <a href={src} download>download it</a>.
+    <svg viewBox="0 0 24 24" width="20" height="20" fill="none">
+      <path d="M12 2 3 7v2h18V7l-9-5Z" fill="currentColor" />
+      <path d="M5 10v9M9 10v9M15 10v9M19 10v9M3 21h18" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" />
+    </svg>
+  );
+}
+function IconPlan() {
+  return (
+    <svg viewBox="0 0 24 24" width="20" height="20" fill="none">
+      <path d="M3 4h13l5 5v11a1 1 0 0 1-1 1H3a1 1 0 0 1-1-1V5a1 1 0 0 1 1-1Z" stroke="currentColor" strokeWidth="1.6" strokeLinejoin="round" />
+      <path d="M16 4v5h5M7 13h10M7 17h6" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" />
+    </svg>
+  );
+}
+function IconId() {
+  return (
+    <svg viewBox="0 0 24 24" width="20" height="20" fill="none">
+      <rect x="2.5" y="5" width="19" height="14" rx="2" stroke="currentColor" strokeWidth="1.6" />
+      <circle cx="8.5" cy="11" r="2" stroke="currentColor" strokeWidth="1.5" />
+      <path d="M5.5 16c.6-1.6 1.8-2.4 3-2.4s2.4.8 3 2.4M14.5 10h4M14.5 13h4" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
+    </svg>
+  );
+}
+function IconSearch() {
+  return (
+    <svg viewBox="0 0 24 24" width="20" height="20" fill="none">
+      <circle cx="10.5" cy="10.5" r="6.5" stroke="currentColor" strokeWidth="1.8" />
+      <path d="M20 20l-4.8-4.8" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" />
+    </svg>
+  );
+}
+function IconCheck() {
+  return (
+    <svg viewBox="0 0 24 24" width="12" height="12" fill="none">
+      <path d="M4 12.5 9.5 18 20 6" stroke="currentColor" strokeWidth="2.6" strokeLinecap="round" strokeLinejoin="round" />
+    </svg>
+  );
+}
+function IconClose() {
+  return (
+    <svg viewBox="0 0 24 24" width="18" height="18" fill="none">
+      <path d="M5 5l14 14M19 5 5 19" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
+    </svg>
+  );
+}
+
+/* ---------- certificate card: thumbnail photo + click-to-view + info strip ---------- */
+function CertCard({ icon, thumb, title, badge, authority, statusLabel, statusValue, href }) {
+  const [open, setOpen] = useState(false);
+
+  useEffect(() => {
+    if (!open) return;
+    const onKey = (e) => e.key === "Escape" && setOpen(false);
+    window.addEventListener("keydown", onKey);
+    document.body.style.overflow = "hidden";
+    return () => {
+      window.removeEventListener("keydown", onKey);
+      document.body.style.overflow = "";
+    };
+  }, [open]);
+
+  return (
+    <>
+      <div className="cert-card reveal">
+        <button type="button" className="cert-thumb" onClick={() => setOpen(true)} aria-label={`View ${title}`}>
+          <iframe
+    src={`${href}#page=1&view=FitH`}
+    title={`${title} preview`}
+  />
+          <span className="cert-verified"><IconCheck /> Verified</span>
+          <span className="cert-overlay">
+            <IconSearch />
+            Click to View
+          </span>
+        </button>
+        <div className="cert-info">
+          <div className="cert-icon">{icon}</div>
+          <div className="cert-text">
+            <h3>{title}</h3>
+            <span className="cert-badge mono">{badge}</span>
+            <p className="cert-authority">{authority}</p>
+            <p className="cert-status mono">
+              {statusLabel}: <strong>{statusValue}</strong>
+            </p>
+          </div>
+        </div>
+        <div className="cert-actions">
+          <a className="btn btn-ghost btn-small" href={href} target="_blank" rel="noreferrer">Open full document</a>
+          <a className="btn btn-ghost btn-small" href={href} download>Download PDF</a>
+        </div>
       </div>
-    </div>
+
+      {open && (
+        <div className="pdf-modal" role="dialog" aria-modal="true" onClick={() => setOpen(false)}>
+          <div className="pdf-modal-inner" onClick={(e) => e.stopPropagation()}>
+            <div className="pdf-modal-head">
+              <span>{title}</span>
+              <button type="button" onClick={() => setOpen(false)} aria-label="Close">
+                <IconClose />
+              </button>
+            </div>
+            <iframe src={`${href}#view=FitH`} title={title} />
+            <div className="pdf-modal-foot">
+              <a className="btn btn-primary btn-small" href={href} target="_blank" rel="noreferrer">Open in new tab</a>
+              <a className="btn btn-ghost btn-small" href={href} download>Download PDF</a>
+            </div>
+          </div>
+        </div>
+      )}
+    </>
   );
 }
 
@@ -108,33 +202,6 @@ function Stat({ value, label }) {
     <div className="stat reveal">
       <div className="stat-value">{value}</div>
       <div className="stat-label">{label}</div>
-    </div>
-  );
-}
-
-function DocCard({ tag, title, desc, meta, href }) {
-  return (
-    <div className="doc-card reveal">
-      <div className="doc-card-top">
-        <div className="doc-tag">{tag}</div>
-        <span className="doc-icon" aria-hidden="true">
-          <svg viewBox="0 0 24 24" width="16" height="16" fill="none">
-            <path d="M12 3v12m0 0l-4.5-4.5M12 15l4.5-4.5M4 19h16" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" />
-          </svg>
-        </span>
-      </div>
-      <h3>{title}</h3>
-      <p>{desc}</p>
-      <div className="doc-meta">
-        <span>{meta}</span>
-      </div>
-      <div className="doc-card-embed">
-        <PdfViewer src={href} />
-        <div className="pdf-actions pdf-actions-card">
-          <a className="btn btn-primary btn-small" href={href} target="_blank" rel="noreferrer">Open full document</a>
-          <a className="btn btn-ghost btn-small" href={href} download>Download PDF</a>
-        </div>
-      </div>
     </div>
   );
 }
@@ -293,6 +360,232 @@ export default function PoojaCity() {
         .svg-parcel-id { fill:var(--terracotta); font-family:'IBM Plex Mono',monospace; font-size:12px; letter-spacing:0.05em; }
         .svg-parcel-sub { fill:rgba(34,29,23,0.4); font-family:'IBM Plex Mono',monospace; font-size:8px; letter-spacing:0.12em; }
 
+/* =========================================================
+   RERA FEATURE DOCUMENT
+========================================================= */
+
+.rera-section {
+  padding: 80px 6vw;
+  background: var(--parchment);
+  border-bottom: 1px solid var(--line);
+}
+
+.rera-container {
+  max-width: 1080px;
+  margin: 0 auto;
+}
+
+.rera-heading {
+  margin-bottom: 34px;
+}
+
+.rera-heading .h-title {
+  margin-bottom: 14px;
+}
+
+/* CARD */
+
+.rera-card {
+  width: min(100%, 920px);
+  margin: 0 auto;
+  background: #fff;
+  border: 1px solid var(--line);
+  border-radius: 20px;
+  overflow: hidden;
+  box-shadow:
+    0 2px 5px rgba(34,29,23,0.05),
+    0 18px 40px rgba(34,29,23,0.08);
+}
+
+/* PDF AREA */
+
+.rera-preview {
+  position: relative;
+  height: 560px;
+  background: #3d3d3d;
+  overflow: hidden;
+}
+
+/* TOP DARK BAR */
+
+.rera-preview-top {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 70px;
+  z-index: 5;
+
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 10px;
+
+  padding: 0 18px;
+
+  background: #3d3d3d;
+}
+
+/* PDF */
+
+.rera-pdf {
+  position: absolute;
+  top: 70px;
+  left: 0;
+
+  width: 100%;
+  height: calc(100% - 70px);
+
+  border: 0;
+  display: block;
+  background: #fff;
+}
+
+/* DOWNLOAD */
+
+.rera-download {
+  width: 40px;
+  height: 40px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  color: #fff;
+  text-decoration: none;
+
+  font-size: 28px;
+  line-height: 1;
+
+  border-radius: 8px;
+
+  transition:
+    background .2s ease,
+    transform .2s ease;
+}
+
+.rera-download:hover {
+  background: rgba(255,255,255,.12);
+  transform: translateY(-1px);
+}
+
+/* VERIFIED */
+
+.rera-verified {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+
+  padding: 8px 14px;
+
+  border-radius: 999px;
+
+  background: var(--sage);
+  color: #fff;
+
+  font-size: .78rem;
+  font-weight: 600;
+
+  box-shadow:
+    0 4px 12px rgba(95,124,104,.3);
+}
+
+/* INFORMATION */
+
+.rera-info {
+  display: flex;
+  gap: 16px;
+  padding: 26px 28px 12px;
+  align-items: flex-start;
+}
+
+.rera-icon {
+  flex: none;
+
+  width: 42px;
+  height: 42px;
+
+  border-radius: 11px;
+
+  background: rgba(176,85,47,.1);
+  color: var(--terracotta);
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.rera-details h3 {
+  font-family: 'Fraunces', serif;
+  font-size: 1.35rem;
+  color: var(--text);
+
+  margin: 0 0 9px;
+  line-height: 1.25;
+}
+
+/* ACTIONS */
+
+.rera-actions {
+  display: flex;
+  gap: 12px;
+
+  padding: 18px 28px 28px;
+}
+
+.rera-actions .btn {
+  flex: 1;
+  justify-content: center;
+}
+
+/* MOBILE */
+
+@media (max-width: 700px) {
+
+  .rera-section {
+    padding: 55px 5vw;
+  }
+
+  .rera-heading {
+    margin-bottom: 24px;
+  }
+
+  .rera-card {
+    border-radius: 16px;
+  }
+
+  .rera-preview {
+    height: 500px;
+  }
+
+  .rera-preview-top {
+    height: 62px;
+    padding: 0 12px;
+  }
+
+  .rera-pdf {
+    top: 62px;
+    height: calc(100% - 62px);
+  }
+
+  .rera-info {
+    padding: 22px 18px 8px;
+  }
+
+  .rera-details h3 {
+    font-size: 1.12rem;
+  }
+
+  .rera-actions {
+    padding: 16px 18px 20px;
+    flex-direction: column;
+  }
+
+  .rera-actions .btn {
+    width: 100%;
+  }
+
+}
         /* ---------- reveal ---------- */
         .reveal { opacity:0; transform:translateY(22px); transition:opacity .7s ease, transform .7s ease; }
         .reveal.is-in { opacity:1; transform:translateY(0); }
@@ -353,10 +646,7 @@ export default function PoojaCity() {
         .approval-card .ac-foot { margin-top:24px; padding-top:18px; border-top:1px solid var(--line); font-family:'IBM Plex Mono',monospace; font-size:0.72rem; color:#6b6153; display:flex; justify-content:space-between; flex-wrap:wrap; gap:8px; }
 
         /* ---------- promoters ---------- */
-        .promoter-block {
-          background:var(--surface2);
-          border-top:1px solid var(--line); border-bottom:1px solid var(--line);
-        }
+        .promoter-block { background:var(--surface2); border-top:1px solid var(--line); border-bottom:1px solid var(--line); }
         .promoter-grid { display:grid; grid-template-columns:repeat(2,1fr); gap:28px; margin-top:48px; }
         @media (max-width:760px){ .promoter-grid{ grid-template-columns:1fr; } }
         .promoter-card { background:#fff; border:1px solid var(--line); padding:36px; }
@@ -367,45 +657,91 @@ export default function PoojaCity() {
         .promoter-card dt { font-family:'IBM Plex Mono',monospace; font-size:0.68rem; letter-spacing:0.1em; text-transform:uppercase; color:rgba(34,29,23,0.45); margin-bottom:4px; }
         .promoter-card dd { margin:0; color:rgba(34,29,23,0.85); font-size:0.92rem; line-height:1.5; }
 
-        /* ---------- documents ---------- */
-        .doc-grid { display:flex; flex-direction:column; gap:28px; margin-top:48px; }
-        .doc-card {
-          display:block; border:1px solid var(--line); background:#fff; padding:30px;
-          transition:border-color .2s, transform .2s, box-shadow .2s;
-        }
-        .doc-card:hover { border-color:var(--terracotta); transform:translateY(-4px); box-shadow:0 14px 30px rgba(22,38,42,0.1); }
-        .doc-card-top { display:flex; align-items:center; justify-content:space-between; margin-bottom:16px; }
-        .doc-icon {
-          width:30px; height:30px; border:1px solid var(--line); border-radius:50%;
-          display:flex; align-items:center; justify-content:center; color:var(--terracotta);
-          transition:background .2s, color .2s, border-color .2s;
-        }
-        .doc-card:hover .doc-icon { background:var(--terracotta); color:#fff; border-color:var(--terracotta); }
-        .doc-tag { font-family:'IBM Plex Mono',monospace; font-size:0.68rem; letter-spacing:0.1em; text-transform:uppercase; color:var(--terracotta); border:1px solid var(--terracotta); display:inline-block; padding:4px 10px; margin:0; }
-        .doc-card h3 { font-family:'Fraunces',serif; font-size:1.2rem; margin:0 0 10px; color:var(--text); }
-        .doc-card p { font-size:0.9rem; color:#584e40; line-height:1.55; margin:0 0 16px; }
-        .doc-meta {
-          font-family:'IBM Plex Mono',monospace; font-size:0.72rem; color:var(--sage);
-          border-top:1px solid var(--line); padding-top:14px;
-          display:flex; align-items:center; justify-content:space-between; gap:10px; flex-wrap:wrap;
-        }
-        .doc-cta { color:var(--terracotta); font-weight:500; white-space:nowrap; }
-        .doc-card-embed { margin-top:22px; padding-top:22px; border-top:1px dashed var(--line); }
-        .btn-small { padding:10px 18px; font-size:0.78rem; margin-top:14px; display:inline-flex; }
+        /* ---------- certificate cards (document photo + verified + click to view) ---------- */
+        .cert-grid { display:grid; grid-template-columns:repeat(3,1fr); gap:28px; margin-top:48px; }
+        @media (max-width:980px){ .cert-grid{ grid-template-columns:1fr 1fr; } }
+        @media (max-width:700px){ .cert-grid{ grid-template-columns:1fr; } }
 
-        /* ---------- pdf viewer ---------- */
-        .pdf-viewer iframe {
-          width:100%; height:700px; border:1px solid var(--line); background:#fff; display:block;
+        .cert-card {
+          background:#fff; border:1px solid var(--line); border-radius:18px; overflow:hidden;
+          display:flex; flex-direction:column;
+          box-shadow:0 1px 3px rgba(22,38,42,0.05);
+          transition:transform .25s ease, box-shadow .25s ease, border-color .25s ease;
         }
-        .pdf-viewer-fallback { font-size:0.74rem; color:#6b6153; margin-top:10px; }
-        .pdf-viewer-fallback a { color:var(--terracotta); }
-        .rera-cert-block .pdf-viewer iframe { height:820px; }
-        .doc-card-embed .pdf-viewer iframe { height:620px; }
-        @media (max-width:640px){
-          .rera-cert-block .pdf-viewer iframe { height:70vh; min-height:420px; }
-          .doc-card-embed .pdf-viewer iframe { height:65vh; min-height:380px; }
+        .cert-card:hover { transform:translateY(-5px); box-shadow:0 18px 34px rgba(22,38,42,0.12); border-color:rgba(176,85,47,0.35); }
+
+        .cert-thumb {
+          position:relative; display:block; width:100%; aspect-ratio:4/3; overflow:hidden;
+          border:0; padding:0; cursor:pointer; background:var(--surface2);
         }
-        .pdf-actions { display:flex; gap:14px; flex-wrap:wrap; margin-top:22px; }
+        .cert-thumb iframe {
+  width: 100%;
+  height: 100%;
+  border: 0;
+  display: block;
+  pointer-events: none;
+  background: #EFE6D2;
+}
+        .cert-thumb:hover img { transform:scale(1.045); filter:saturate(1) contrast(1.02) brightness(0.94); }
+
+        .cert-verified {
+          position:absolute; top:12px; right:12px; z-index:2;
+          display:inline-flex; align-items:center; gap:5px;
+          background:var(--sage); color:#fff; font-size:0.7rem; font-weight:600;
+          padding:6px 11px 6px 8px; border-radius:999px; letter-spacing:0.02em;
+          box-shadow:0 4px 10px rgba(95,124,104,0.35);
+        }
+        .cert-verified svg { flex:none; }
+
+        .cert-overlay {
+          position:absolute; inset:0; z-index:1;
+          display:flex; flex-direction:column; align-items:center; justify-content:center; gap:8px;
+          background:rgba(22,38,42,0.42); color:#fff;
+          font-family:'Space Grotesk',sans-serif; font-weight:600; font-size:0.86rem; letter-spacing:0.03em;
+          opacity:0; transition:opacity .25s ease;
+        }
+        .cert-thumb:hover .cert-overlay, .cert-thumb:focus-visible .cert-overlay { opacity:1; }
+        .cert-overlay svg { width:26px; height:26px; }
+
+        .cert-info { display:flex; gap:14px; padding:20px 22px 6px; align-items:flex-start; }
+        .cert-icon {
+          flex:none; width:38px; height:38px; border-radius:10px;
+          background:rgba(176,85,47,0.1); color:var(--terracotta);
+          display:flex; align-items:center; justify-content:center;
+        }
+        .cert-text h3 { font-family:'Fraunces',serif; font-size:1.08rem; color:var(--text); margin:0 0 8px; line-height:1.25; }
+        .cert-badge {
+          display:inline-block; font-size:0.68rem; color:var(--terracotta);
+          background:rgba(199,154,61,0.14); border:1px solid rgba(199,154,61,0.4);
+          padding:4px 9px; border-radius:999px; margin-bottom:10px;
+        }
+        .cert-authority { font-size:0.82rem; color:#6b6153; margin:0 0 6px; line-height:1.45; }
+        .cert-status { font-size:0.72rem; color:var(--sage); letter-spacing:0.04em; text-transform:uppercase; }
+        .cert-status strong { color:#3f5c48; }
+
+        .cert-actions { display:flex; gap:10px; padding:16px 22px 22px; margin-top:auto; }
+        .cert-actions .btn-small { flex:1; justify-content:center; }
+
+        .btn-small { padding:10px 16px; font-size:0.76rem; }
+
+        /* ---------- pdf modal ---------- */
+        .pdf-modal {
+          position:fixed; inset:0; z-index:100; background:rgba(22,38,42,0.72);
+          display:flex; align-items:center; justify-content:center; padding:24px;
+          backdrop-filter:blur(3px);
+        }
+        .pdf-modal-inner {
+          background:#fff; width:min(880px, 100%); max-height:92vh; border-radius:14px;
+          display:flex; flex-direction:column; overflow:hidden; box-shadow:0 30px 60px rgba(0,0,0,0.35);
+        }
+        .pdf-modal-head {
+          display:flex; align-items:center; justify-content:space-between;
+          padding:16px 20px; border-bottom:1px solid var(--line);
+          font-family:'Fraunces',serif; font-size:1.05rem; color:var(--text);
+        }
+        .pdf-modal-head button { background:none; border:none; cursor:pointer; color:var(--text); padding:4px; display:flex; }
+        .pdf-modal-inner iframe { width:100%; flex:1; min-height:60vh; border:0; background:var(--surface2); }
+        .pdf-modal-foot { display:flex; gap:12px; padding:16px 20px; border-top:1px solid var(--line); }
 
         /* ---------- footer ---------- */
         footer.pc-footer { background:var(--surface2); color:rgba(34,29,23,0.6); padding:70px 6vw 34px; border-top:1px solid var(--line); }
@@ -420,7 +756,7 @@ export default function PoojaCity() {
 
         .fade-note { font-size:0.78rem; color:#7a705f; margin-top:10px; }
 
-        /* ---------- mobile: sections, stats, cards ---------- */
+        /* ---------- mobile ---------- */
         @media (max-width:640px){
           section.block{ padding:64px 6vw; }
           h2.h-title{ font-size:2rem; margin-bottom:16px; }
@@ -447,11 +783,12 @@ export default function PoojaCity() {
 
           .promoter-card{ padding:26px; }
 
-          .doc-card{ padding:20px; }
-          .doc-card h3{ font-size:1.05rem; }
-          .pdf-actions, .pdf-actions-card{ flex-direction:column; }
-          .pdf-actions .btn, .pdf-actions-card .btn{ width:100%; justify-content:center; }
-          .rera-cert-block{ padding-left:5vw; padding-right:5vw; }
+          .cert-grid{ gap:20px; }
+          .cert-info{ padding:18px 18px 4px; }
+          .cert-actions{ padding:14px 18px 18px; flex-direction:column; }
+          .pdf-modal{ padding:0; }
+          .pdf-modal-inner{ width:100%; height:100%; max-height:100%; border-radius:0; }
+          .pdf-modal-foot{ flex-direction:column; }
 
           footer.pc-footer{ padding:56px 6vw 26px; }
           .footer-top{ gap:32px; padding-bottom:32px; }
@@ -465,7 +802,6 @@ export default function PoojaCity() {
         <div className="nav-mark"><LogoMark size={30} /> POOJA CITY</div>
         <div className="nav-links">
           <a href="#about">Overview</a>
-          <a href="#rera-certificate">Certificate</a>
           <a href="#location">Location</a>
           <a href="#approvals">Approvals</a>
           <a href="#promoters">Promoters</a>
@@ -486,7 +822,6 @@ export default function PoojaCity() {
       <div className={`mobile-menu ${menuOpen ? "is-open" : ""}`}>
         <div className="mobile-menu-mark"><LogoMark size={40} /></div>
         <a href="#about" onClick={closeMenu}>Overview</a>
-        <a href="#rera-certificate" onClick={closeMenu}>Certificate</a>
         <a href="#location" onClick={closeMenu}>Location</a>
         <a href="#approvals" onClick={closeMenu}>Approvals</a>
         <a href="#promoters" onClick={closeMenu}>Promoters</a>
@@ -515,22 +850,106 @@ export default function PoojaCity() {
           </div>
         </div>
       </header>
+{/* RERA DOCUMENT — BELOW HERO */}
+<section className="rera-section">
+  <div className="rera-container">
 
-      {/* RERA CERTIFICATE — full document, viewable inline */}
-      <section className="block rera-cert-block" id="rera-certificate">
-        <span className="kicker">— The RERA Certificate</span>
-        <h2 className="h-title">See it for yourself.</h2>
-        <p className="lead-text">
-          No summary needed here — this is the actual Form-C certificate issued by
-          Chhattisgarh RERA, Reg. No. PCGRERA090226002040, registering Pooja City under
-          the RERA Act, 2016.
-        </p>
-        <PdfViewer src="/documents/rera-registration-certificate.pdf" />
-        <div className="pdf-actions">
-          <a className="btn btn-primary" href="/documents/rera-registration-certificate.pdf" target="_blank" rel="noreferrer">Open full document</a>
-          <a className="btn btn-ghost" href="/documents/rera-registration-certificate.pdf" download>Download PDF</a>
+    <div className="rera-heading">
+      <span className="kicker">Official Document</span>
+      <h2 className="h-title">RERA Registration Certificate</h2>
+      <p className="lead-text">
+        View the official registration certificate issued by the
+        Chhattisgarh Real Estate Regulatory Authority.
+      </p>
+    </div>
+
+    <div className="rera-card">
+
+      {/* PDF PREVIEW HEADER */}
+      <div className="rera-preview">
+
+        <div className="rera-preview-top">
+
+          <a
+            href="/documents/rera-registration-certificate.pdf"
+            target="_blank"
+            rel="noreferrer"
+            className="rera-download"
+            aria-label="Download RERA PDF"
+          >
+            ↓
+          </a>
+
+          <span className="rera-verified">
+            ✓ Verified
+          </span>
+
         </div>
-      </section>
+
+        {/* ACTUAL PDF */}
+        <iframe
+          src="/documents/rera-registration-certificate.pdf#page=1"
+          title="RERA Registration Certificate"
+          className="rera-pdf"
+        />
+
+      </div>
+
+      {/* DOCUMENT INFORMATION */}
+      <div className="rera-info">
+
+        <div className="rera-icon">
+          <IconInstitution />
+        </div>
+
+        <div className="rera-details">
+
+          <h3>RERA Registration Certificate</h3>
+
+          <span className="cert-badge mono">
+            PCGRERA090226002040
+          </span>
+
+          <p className="cert-authority">
+            Chhattisgarh Real Estate Regulatory Authority,
+            Raipur
+          </p>
+
+          <p className="cert-status mono">
+            REGISTERED:
+            <strong> 09 FEB 2026</strong>
+          </p>
+
+        </div>
+
+      </div>
+
+      {/* ACTION BUTTONS */}
+      <div className="rera-actions">
+
+        <a
+          className="btn btn-ghost btn-small"
+          href="/documents/rera-registration-certificate.pdf"
+          target="_blank"
+          rel="noreferrer"
+        >
+          Open full document
+        </a>
+
+        <a
+          className="btn btn-ghost btn-small"
+          href="/documents/rera-registration-certificate.pdf"
+          download
+        >
+          Download PDF
+        </a>
+
+      </div>
+
+    </div>
+
+  </div>
+</section>
 
       {/* STATS */}
       <div className="stats-strip">
@@ -684,27 +1103,40 @@ export default function PoojaCity() {
       <section className="block" id="documents">
         <span className="kicker">05 — Documents</span>
         <h2 className="h-title">Official record, unredacted.</h2>
-        <p className="lead-text">The three filings this page is built from — issued by CG-RERA and the Directorate of Town &amp; Country Planning.</p>
-        <div className="doc-grid">
-          <DocCard
-            tag="Form-C"
+        <p className="lead-text">
+          The three filings this page is built from — tap any certificate to view the
+          full scanned document, or download it for your records.
+        </p>
+        <div className="cert-grid">
+          <CertCard
+            icon={<IconInstitution />}
+            thumb="/thumbs/rera-cert.jpg"
             title="RERA Registration Certificate"
-            desc="Chhattisgarh RERA's Form-C certificate registering Pooja City under the RERA Act, 2016, with validity and promoter conditions."
-            meta="Reg. No. PCGRERA090226002040 · Raipur"
+            badge="PCGRERA090226002040"
+            authority="Chhattisgarh Real Estate Regulatory Authority, Raipur"
+            statusLabel="Registered"
+            statusValue="09 Feb 2026"
             href="/documents/rera-registration-certificate.pdf"
+            
           />
-          <DocCard
-            tag="TNCP Approval"
+          <CertCard
+            icon={<IconPlan />}
+            thumb="/thumbs/tncp-permission.jpg"
             title="Town &amp; Country Planning Permission"
-            desc="Development permission for commercial plotting, with the full 33-point condition schedule from the Bilaspur Regional TNCP office."
-            meta="Letter No. CG/BSP/TNCP/PLC/2025/0024"
+            badge="CG/BSP/TNCP/PLC/2025/0024"
+            authority="Joint Director, Town &amp; Country Planning, Bilaspur Regional"
+            statusLabel="Issued"
+            statusValue="04 Dec 2025"
             href="/documents/tncp-development-permission.pdf"
           />
-          <DocCard
-            tag="Annexure-13"
-            title="Promoter Details"
-            desc="Statutory promoter-details annexure naming Manoj Kumar Sidara and Prithvi Raj Sidara as the project's promoters."
-            meta="Annexure-13 · Photograph identification"
+          <CertCard
+            icon={<IconId />}
+            thumb="/thumbs/promoter-annexure.jpg"
+            title="Promoter Details — Annexure 13"
+            badge="Annexure-13"
+            authority="Manoj Kumar Sidara &amp; Prithvi Raj Sidara"
+            statusLabel="Filed with"
+            statusValue="CG-RERA"
             href="/documents/promoter-details-annexure-13.pdf"
           />
         </div>
