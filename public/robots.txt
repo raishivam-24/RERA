@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://poojacity.in/sitemap.xml
